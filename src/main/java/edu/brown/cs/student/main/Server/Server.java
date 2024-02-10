@@ -3,6 +3,7 @@ import static spark.Spark.after;
 
 import edu.brown.cs.student.main.APIHandlers.Broadband;
 import edu.brown.cs.student.main.CSVHandlers.LoadCSV;
+import edu.brown.cs.student.main.CSVHandlers.Proxy;
 import edu.brown.cs.student.main.CSVHandlers.SearchCSV;
 import edu.brown.cs.student.main.CSVHandlers.ViewCSV;
 import spark.Spark;
@@ -19,10 +20,10 @@ public class Server {
           response.header("Access-Control-Allow-Origin", "*");
           response.header("Access-Control-Allow-Methods", "*");
         });
-
+   Proxy proxy = new Proxy();
     // Setting up the handler for the GET /order and /activity endpoints
-    Spark.get("loadcsv", new LoadCSV());
-    Spark.get("viewcsv", new ViewCSV());
+    Spark.get("loadcsv", new LoadCSV(proxy));
+    Spark.get("viewcsv", new ViewCSV(proxy));
     Spark.get("searchcsv", new SearchCSV());
     Spark.get("broadband", new Broadband());
     Spark.init();
