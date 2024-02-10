@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main;
+package CSVHandlers.SearchClasses;
 
 import static java.lang.Integer.parseInt;
 
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 /** Class that searches a CSV dataset and returns rows of the dataset with the value searched for */
-public class Search {
+public class SearchCSV {
 
   List<List<String>> results;
   /**
@@ -21,7 +21,7 @@ public class Search {
    * @throws IOException - When there is an error opening the CSV data file as a BufferedReader
    * @throws FactoryFailureException - When there is a malformed row in the dataset
    */
-  public Search(String csvFileName, String value) throws IOException, FactoryFailureException {
+  public SearchCSV(String csvFileName, String value) throws IOException, FactoryFailureException {
     List<List<String>> parsedData = parseData(csvFileName);
     this.results = new ArrayList<>();
     allColsPrint(parsedData, value);
@@ -37,7 +37,7 @@ public class Search {
    * @throws IOException - When there is an error opening the CSV data file as a Buffered Reader
    * @throws FactoryFailureException - When there is a malformed row in the dataset
    */
-  public Search(String csvFileName, String value, boolean headers, String colHeader)
+  public SearchCSV(String csvFileName, String value, boolean headers, String colHeader)
       throws IOException, FactoryFailureException, ValueNotFoundException {
     List<List<String>> parsedData = parseData(csvFileName);
 

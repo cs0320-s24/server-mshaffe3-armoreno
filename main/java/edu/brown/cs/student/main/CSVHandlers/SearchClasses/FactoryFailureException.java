@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main;
+package CSVHandlers.SearchClasses;
 
 import java.util.ArrayList;
 import java.util.List;

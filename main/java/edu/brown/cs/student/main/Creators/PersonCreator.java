@@ -2,7 +2,7 @@ package edu.brown.cs.student.main.Creators;
 
 import static java.lang.Integer.parseInt;
 
-import edu.brown.cs.student.main.FactoryFailureException;
+import CSVHandlers.SearchClasses.FactoryFailureException;
 import java.util.List;
 
 public class PersonCreator implements CreatorFromRow<Person> {

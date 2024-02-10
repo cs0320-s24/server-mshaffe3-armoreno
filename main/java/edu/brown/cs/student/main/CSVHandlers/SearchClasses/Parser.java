@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main;
+package CSVHandlers.SearchClasses;
 
 import edu.brown.cs.student.main.Creators.CreatorFromRow;
 import java.io.BufferedReader;
