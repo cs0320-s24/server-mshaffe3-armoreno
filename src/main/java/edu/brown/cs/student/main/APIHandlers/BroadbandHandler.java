@@ -4,6 +4,10 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import java.net.http.HttpRequest;
+import java.util.HashMap;
+import java.util.Map;
+
 public class BroadbandHandler implements Route {
 
 
@@ -11,6 +15,14 @@ public class BroadbandHandler implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
 
+        String targetState = request.queryParams("state");
+        String county = request.queryParams("county");
+
+        Map<String, Object> responseMap = new HashMap<>();
+
+        try{
+
+        }
         /**
          *     Set<String> params = request.queryParams();
          *     String participants = request.queryParams("participants");
@@ -38,5 +50,14 @@ public class BroadbandHandler implements Route {
          *     return responseMap;
          */
         return null;
+    }
+
+    private String isEmptyParam(String toCheck){
+
+    }
+
+    private String sendRequest(String targetState, String county){
+
+        HttpRequest buildAcsApiRequest = HttpRequest.newBuilder().uri()
     }
 }
