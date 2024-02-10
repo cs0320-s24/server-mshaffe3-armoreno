@@ -1,5 +1,15 @@
 package edu.brown.cs.student.main.APIHandlers;
 
-public class Broadband implements Route{
+import spark.Request;
+import spark.Response;
+import spark.Route;
 
+public class Broadband implements Route {
+
+
+
+    @Override
+    public Object handle(Request request, Response response) throws Exception {
+        return null;
+    }
 }

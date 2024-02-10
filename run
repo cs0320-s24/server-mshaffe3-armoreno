@@ -27,10 +27,10 @@ CP=$(cat .mvn-classpath)
 
 # We're trying to make the script more reusable by finding the package
 # name, instead of hard coding.  But this relies on some conventions
-# in naming.  You'll have to call your class "main.java.edu.brown.cs.student.main.Server" and use our
+# in naming.  You'll have to call your class "main.java.edu.brown.cs.student.main.Server.Server" and use our
 # recommended package structure.
 
-# Find main.java.edu.brown.cs.student.main.Server.java. It should be in a package below your username package.
+# Find main.java.edu.brown.cs.student.main.Server.Server.java. It should be in a package below your username package.
 MAIN=$(ls src/main/java/edu/brown/cs/*/*/server/main.java.edu.brown.cs.student.main.Server.java)
 [ -z "$MAIN" ] && echo "You need a Server.java" && exit 1
 [ ! -e "$MAIN" ] && echo "You can only have one Server.java" && exit 1
@@ -44,7 +44,7 @@ fi
 
 # The symbol "$@" passes the command-line arguments from
 # this script to your Java program.
-# NOTE: You MUST package your main.java.edu.brown.cs.student.main.Server at the path specified below, if you do not, it likely
-# will NOT run. If you change the package structure of your main.java.edu.brown.cs.student.main.Server class. You must change this path
+# NOTE: You MUST package your main.java.edu.brown.cs.student.main.Server.Server at the path specified below, if you do not, it likely
+# will NOT run. If you change the package structure of your main.java.edu.brown.cs.student.main.Server.Server class. You must change this path
 # as well.
 java -ea -cp "$TARGET$PATHSEP$CP" edu.brown.cs.student.main.server.main.java.edu.brown.cs.student.main.Server "$@"
