@@ -22,9 +22,9 @@ public class Search {
    * @throws FactoryFailureException - When there is a malformed row in the dataset
    */
   public Search(String csvFileName, String value) throws IOException, FactoryFailureException {
-    List<List<String>> parsedData = parseData(csvFileName);
+    //List<List<String>> parsedData = parseData(csvFileName);
     this.results = new ArrayList<>();
-    allColsPrint(parsedData, value);
+    //allColsPrint(parsedData, value);
   }
 
   /**
@@ -39,10 +39,9 @@ public class Search {
    */
   public Search(String csvFileName, String value, boolean headers, String colHeader)
       throws IOException, FactoryFailureException, ValueNotFoundException {
-    List<List<String>> parsedData = parseData(csvFileName);
 
     this.results = new ArrayList<>();
-    specColPrint(convertHeader(parsedData.get(0), colHeader, headers), parsedData, value);
+    //specColPrint(convertHeader(parsedData.get(0), colHeader, headers), parsedData, value);
   }
 
   /**
@@ -77,29 +76,6 @@ public class Search {
         this.results.add(row);
       }
     }
-  }
-
-  /**
-   * Parses the CSV data into a 2D array of strings
-   *
-   * @param csvFileName - the name of the file to be parsed
-   * @return - 2D array of parsed data
-   * @throws IOException - When there is an error opening the CSV data file as a Buffered Reader
-   * @throws FactoryFailureException - When there is a malformed row
-   */
-  private List<List<String>> parseData(String csvFileName)
-      throws IOException, FactoryFailureException {
-    // creates a buffered reader out of the fileName created
-    BufferedReader csv = new BufferedReader(new FileReader("data/" + csvFileName));
-
-    // creates an object creator to pass to parse
-    CreatorFromRow<List<String>> stringCreator = new StringCreator();
-
-    // takes in above to create a parser object
-    Parser<List<String>> parser = new Parser<>(csv, stringCreator);
-
-    // returns a double array of strings from the above csv
-    return parser.parse();
   }
 
   /**
