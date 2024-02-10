@@ -2,8 +2,8 @@ package edu.brown.cs.student.main.CSVHandlers.SearchFunctionality;
 
 import static java.lang.Integer.parseInt;
 
-import edu.brown.cs.student.main.Creators.CreatorFromRow;
-import edu.brown.cs.student.main.Creators.StringCreator;
+import edu.brown.cs.student.main.CSVHandlers.SearchFunctionality.Creators.CreatorFromRow;
+import edu.brown.cs.student.main.CSVHandlers.SearchFunctionality.Creators.StringCreator;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package edu.brown.cs.student.main.CSVHandlers.SearchFunctionality;
 
-import edu.brown.cs.student.main.Creators.CreatorFromRow;
+import edu.brown.cs.student.main.CSVHandlers.SearchFunctionality.Creators.CreatorFromRow;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main.Creators;
+package edu.brown.cs.student.main.CSVHandlers.SearchFunctionality.Creators;
 
 import edu.brown.cs.student.main.CSVHandlers.SearchFunctionality.FactoryFailureException;
 import java.util.ArrayList;
