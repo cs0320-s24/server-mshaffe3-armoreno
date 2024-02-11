@@ -20,9 +20,9 @@ public class BroadbandHandler implements Route {
 
         Map<String, Object> responseMap = new HashMap<>();
 
-        try{
-
-        }
+//        try{
+//
+//        }
         /**
          *     Set<String> params = request.queryParams();
          *     String participants = request.queryParams("participants");
@@ -53,11 +53,8 @@ public class BroadbandHandler implements Route {
     }
 
     private String isEmptyParam(String toCheck){
-
+        return "";
     }
 
-    private String sendRequest(String targetState, String county){
 
-        HttpRequest buildAcsApiRequest = HttpRequest.newBuilder().uri()
-    }
 }
