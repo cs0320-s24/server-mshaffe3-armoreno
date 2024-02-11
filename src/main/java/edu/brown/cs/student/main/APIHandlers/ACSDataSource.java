@@ -23,11 +23,15 @@ public class ACSDataSource {
         return 0;
     }
 
-    private int getState(){
+    private int getState(String county){
         return 0;
     }
 
-    public BroadbandData getBroadbandData(int stateCode, int countyCode) throws IOException {
+    public BroadbandData getBroadbandData(String state, String county) throws IOException {
+        return getBroadbandData(getState(state), getCounty(county, state));
+    }
+
+    private BroadbandData getBroadbandData(int stateCode, int countyCode) throws IOException {
         URL requestURL = new URL("https",
                 "api.census.gov",
                 "/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:"
