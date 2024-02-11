@@ -7,10 +7,8 @@ import java.io.IOException;
 
 public class BroadbandUtilities {
     /**
-     * Deserializes JSON from the BoredAPI into an Activity object.
+     * Deserializes JSON from the ACS API into a Broadband object.
      *
-     * @param jsonBroadband
-     * @return
      */
     public static Broadband deserializeActivity(String jsonBroadband) {
         try {
@@ -31,4 +29,3 @@ public class BroadbandUtilities {
         }
     }
 }
-

@@ -8,21 +8,23 @@ import edu.brown.cs.student.main.CSVHandlers.SearchFunctionality.Parser;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
 public class LoadCSV implements Route {
+  private final Proxy proxy;
+  public LoadCSV(Proxy proxy){
+    this.proxy = proxy;
+  }
 
   @Override
   public Object handle(Request request, Response response) throws Exception {
     String filepath = request.queryParams("filename");
     try{
       List<List<String>> parsedData = this.parseData(filepath);
-      Proxy myProxy = new Proxy(parsedData);
+      this.proxy.setData(parsedData);
     }
     catch (IOException | FactoryFailureException e) {
       return new FileLoadFailureResponse().serialize();

@@ -21,10 +21,9 @@ public class Search {
    * @throws IOException - When there is an error opening the CSV data file as a BufferedReader
    * @throws FactoryFailureException - When there is a malformed row in the dataset
    */
-  public Search(String csvFileName, String value) throws IOException, FactoryFailureException {
-    //List<List<String>> parsedData = parseData(csvFileName);
+  public Search(List<List<String>> parsedData, String value) throws IOException, FactoryFailureException {
     this.results = new ArrayList<>();
-    //allColsPrint(parsedData, value);
+    allColsPrint(parsedData, value);
   }
 
   /**
@@ -37,11 +36,11 @@ public class Search {
    * @throws IOException - When there is an error opening the CSV data file as a Buffered Reader
    * @throws FactoryFailureException - When there is a malformed row in the dataset
    */
-  public Search(String csvFileName, String value, boolean headers, String colHeader)
+  public Search(List<List<String>> parsedData, String value, boolean headers, String colHeader)
       throws IOException, FactoryFailureException, ValueNotFoundException {
 
     this.results = new ArrayList<>();
-    //specColPrint(convertHeader(parsedData.get(0), colHeader, headers), parsedData, value);
+    specColPrint(convertHeader(parsedData.get(0), colHeader, headers), parsedData, value);
   }
 
   /**
@@ -88,6 +87,7 @@ public class Search {
    */
   private int convertHeader(List<String> headerRow, String header, boolean headers)
       throws ValueNotFoundException {
+
     int colCounter = 0;
     if (headers) {
       for (String posHeader : headerRow) {
