@@ -54,10 +54,12 @@ public class BroadbandHandler implements Route {
 
     private String isEmptyParam(String toCheck){
 
+        return toCheck;
     }
 
     private String sendRequest(String targetState, String county){
 
-        HttpRequest buildAcsApiRequest = HttpRequest.newBuilder().uri()
+        //HttpRequest buildAcsApiRequest = HttpRequest.newBuilder().uri();
+        return targetState;
     }
 }
