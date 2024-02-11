@@ -24,7 +24,7 @@ public class Server {
     // Setting up the handler for the GET /order and /activity endpoints
     Spark.get("loadcsv", new LoadCSV(proxy));
     Spark.get("viewcsv", new ViewCSV(proxy));
-    Spark.get("searchcsv", new SearchCSV());
+    Spark.get("searchcsv", new SearchCSV(proxy));
     Spark.get("broadband", new BroadbandHandler());
     Spark.init();
     Spark.awaitInitialization();
