@@ -1,5 +1,7 @@
 package edu.brown.cs.student.main.CSVHandlers;
 
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 import edu.brown.cs.student.main.CSVHandlers.SearchFunctionality.Search;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,8 @@ public class SearchCSV implements Route {
         String identifier = request.queryParams("identifier");
 
         Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("value_query", value);
+        responseMap.put("column_identifier", identifier);
 
 
         //headers boolean true = words, false = index
@@ -49,11 +53,27 @@ public class SearchCSV implements Route {
                 responseMap.put("Match #" + results.indexOf(result), result);
             }
         }
+        return new SearchResultResponse(responseMap).serialize();
+    }
 
-        //TODO need to serialize!
 
+    public record SearchResultResponse(Map<String, Object> responseMap){
 
+        String serialize(){
+            try {
+                // Initialize Moshi which takes in this class and returns it as JSON!
+                Moshi moshi = new Moshi.Builder().build();
+                JsonAdapter<SearchResultResponse> adapter =
+                    moshi.adapter(SearchResultResponse.class);
+                return adapter.toJson(this);
+            } catch (Exception e) {
+                // For debugging purposes, show in the console _why_ this fails
+                // Otherwise we'll just get an error 500 from the API in integration
+                // testing.
+                e.printStackTrace();
+                throw e;
+            }
+        }
 
-        return null;
     }
 }
