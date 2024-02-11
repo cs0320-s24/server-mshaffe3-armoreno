@@ -8,29 +8,33 @@ import edu.brown.cs.student.main.CSVHandlers.SearchFunctionality.Parser;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
 public class LoadCSV implements Route {
   private final Proxy proxy;
-  public LoadCSV(Proxy proxy){
+
+  public LoadCSV(Proxy proxy) {
     this.proxy = proxy;
   }
 
   @Override
-  public Object handle(Request request, Response response) throws Exception {
-    String filepath = request.queryParams("filename");
-    try{
+  public Object handle(Request request, Response response) {
+    Map<String, Object> responseMap = new HashMap<>();
+    String filepath = request.queryParams("filepath");
+    responseMap.put("filepath", filepath);
+    try {
       List<List<String>> parsedData = this.parseData(filepath);
       this.proxy.setData(parsedData);
-    }
-    catch (IOException | FactoryFailureException e) {
-      return new FileLoadFailureResponse().serialize();
+    } catch (IOException | FactoryFailureException e) {
+      return new FileLoadFailureResponse(responseMap).serialize();
     }
 
-    return new FileLoadSuccessResponse().serialize();
+    return new FileLoadSuccessResponse(responseMap).serialize();
   }
 
   /**
@@ -58,11 +62,12 @@ public class LoadCSV implements Route {
 
   /**
    * Builds a response for a File Unable to Load
+   *
    * @param response_type
    */
-  public record FileLoadSuccessResponse(String response_type) {
-    public FileLoadSuccessResponse() {
-      this("loadSuccess");
+  public record FileLoadSuccessResponse(String response_type, Map<String, Object> responseMap) {
+    public FileLoadSuccessResponse(Map<String, Object> responseMap) {
+      this("loadSuccess", responseMap);
     }
 
     /**
@@ -76,11 +81,12 @@ public class LoadCSV implements Route {
 
   /**
    * Builds a response for a File Unable to load
+   *
    * @param response_type
    */
-  public record FileLoadFailureResponse(String response_type) {
-    public FileLoadFailureResponse() {
-      this("loadFailure");
+  public record FileLoadFailureResponse(String response_type, Map<String, Object> responseMap) {
+    public FileLoadFailureResponse(Map<String, Object> responseMap) {
+      this("loadFailure", responseMap);
     }
     /**
      * @return this response, serialized as Json
@@ -91,5 +97,3 @@ public class LoadCSV implements Route {
     }
   }
 }
-
-

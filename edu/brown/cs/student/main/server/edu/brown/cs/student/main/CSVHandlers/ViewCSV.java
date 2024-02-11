@@ -10,14 +10,17 @@ import spark.Route;
 
 public class ViewCSV implements Route {
   List<List<String>> data;
-  public ViewCSV(Proxy proxy){ //proxy is created in load, but
-    this.data = proxy.getData();
+  Proxy proxy;
+
+  public ViewCSV(Proxy proxy) { // proxy is created in load, but
+    this.proxy = proxy;
   }
 
   @Override
   public Object handle(Request request, Response response) throws Exception {
-    //If there has not been a loaded file/empty file, return a load failure response
-    if(this.data.equals(new ArrayList<>())){
+    this.data = proxy.getData();
+    // If there has not been a loaded file/empty file, return a load failure response
+    if (this.data.equals(new ArrayList<>())) {
       return new NoFileLoadedResponse().serialize();
     }
     return new ViewLoadedResponse(data).serialize();
@@ -25,6 +28,7 @@ public class ViewCSV implements Route {
 
   /**
    * Response for successfully accessed loaded file
+   *
    * @param response_type
    * @param csv
    */
@@ -35,19 +39,19 @@ public class ViewCSV implements Route {
     /**
      * @return this response, serialized as Json
      */
-      String serialize() {
-        try {
-          // Initialize Moshi which takes in this class and returns it as JSON!
-          Moshi moshi = new Moshi.Builder().build();
-          JsonAdapter<ViewLoadedResponse> adapter = moshi.adapter(ViewLoadedResponse.class);
-          return adapter.toJson(this);
-        } catch (Exception e) {
-          // For debugging purposes, show in the console _why_ this fails
-          // Otherwise we'll just get an error 500 from the API in integration
-          // testing.
-          e.printStackTrace();
-          throw e;
-        }
+    String serialize() {
+      try {
+        // Initialize Moshi which takes in this class and returns it as JSON!
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<ViewLoadedResponse> adapter = moshi.adapter(ViewLoadedResponse.class);
+        return adapter.toJson(this);
+      } catch (Exception e) {
+        // For debugging purposes, show in the console _why_ this fails
+        // Otherwise we'll just get an error 500 from the API in integration
+        // testing.
+        e.printStackTrace();
+        throw e;
+      }
     }
   }
 
