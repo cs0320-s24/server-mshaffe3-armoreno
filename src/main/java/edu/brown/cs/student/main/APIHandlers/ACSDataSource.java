@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 import okio.Buffer;
 
@@ -41,9 +43,12 @@ public class ACSDataSource implements APISource{
             "/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:"
                 + countyCode
                 + "&in=state:"
-                + stateCode +"&key=c62c39cc48683fae5510e74dbad5e1aa8cd6ed5a");
+                + stateCode);
+
+    //+"&key=c62c39cc48683fae5510e74dbad5e1aa8cd6ed5a"
 
     HttpURLConnection clientConnection = connect(requestURL);
+
 
     Moshi moshi = new Moshi.Builder().build();
 
@@ -51,11 +56,14 @@ public class ACSDataSource implements APISource{
     // NOTE: important! pattern for handling the input stream
 
     // makes our object to interpret received JSON
+    System.out.println(new Buffer().readFrom(clientConnection.getInputStream()));
+
+
     Broadband body = adapter.fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
 
+    System.out.println("read from client");
     // disconnects connection from api
     clientConnection.disconnect();
-
     return new BroadbandData(body, Calendar.getInstance(), state, county);
   }
 

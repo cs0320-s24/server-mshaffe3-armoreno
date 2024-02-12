@@ -1,10 +1,10 @@
 package Broadband;
 
-public class Broadband {
-  private String S2802_C03_022E;
+import java.util.List;
 
-  @Override
-  public String toString() {
-    return this.S2802_C03_022E + "%";
-  }
-}
+public record Broadband(List<List<String>> data){}
+//
+//  @Override
+//  public String toString() {
+//    return this.S2802_C03_022E + "%";
+//  }
