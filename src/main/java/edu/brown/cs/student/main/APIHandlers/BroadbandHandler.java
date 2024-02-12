@@ -42,9 +42,9 @@ public class BroadbandHandler implements Route {
       return adapter.toJson(responseMap);
     }
 
-    try{
-      try{
-        BroadbandData data = this.proxy.getBroadbandData(targetState, county);
+//    try{
+//      try{
+        BroadbandData data = this.proxy.getBroadbandData(new String[]{targetState, county});
         // Building responses *IS* the job of this class:
         responseMap.put("type", "success");
 
@@ -54,12 +54,12 @@ public class BroadbandHandler implements Route {
         responseMap.put("State", data.state());
         responseMap.put("County", data.county());
 
-      }catch (IOException ioException){
-        responseMap.put("result", ioException.getMessage());
-      }
-    }catch (DatasourceException e){
-      responseMap.put("result", e.getMessage());
-    }
+//      }catch (IOException ioException){
+//        responseMap.put("result", ioException.getMessage());
+//      }
+//    }catch (DatasourceException e){
+//      responseMap.put("result", e.getMessage());
+//    }
 
     return adapter.toJson(responseMap);
   }

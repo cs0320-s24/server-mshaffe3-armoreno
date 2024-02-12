@@ -1,19 +1,18 @@
 package APIHandlers;
 
-
-import Broadband.BroadbandData;
 import Broadband.Broadband;
-import com.squareup.moshi.Moshi;
-import okio.Buffer;
+import Broadband.BroadbandData;
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Map;
+import okio.Buffer;
 
-public class ACSDataSource {
+public class ACSDataSource implements APISource{
 
   Map<String, String> stateCodes;
 
@@ -26,10 +25,10 @@ public class ACSDataSource {
 
     return "06";
   }
-
-//  public BroadbandData getBroadbandData(String state, String county) throws IOException {
-//    return getBroadbandData(state, county);
-//  }
+  @Override
+  public BroadbandData getBroadbandData(String[] loc) throws IOException, DatasourceException {
+    return getBroadbandData(getState(loc[0]), getCounty(loc[0], loc[1]));
+  }
 
   public BroadbandData getBroadbandData(String state, String county) throws IOException, DatasourceException {
 

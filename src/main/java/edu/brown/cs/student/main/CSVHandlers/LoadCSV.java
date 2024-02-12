@@ -23,7 +23,7 @@ public class LoadCSV implements Route {
   @Override
   public Object handle(Request request, Response response) {
     String filepath = request.queryParams("filepath");
-    if(filepath ==null){
+    if (filepath == null) {
       return new FileLoadFailureResponse("no filepath provided");
     }
 
@@ -49,7 +49,7 @@ public class LoadCSV implements Route {
   private List<List<String>> parseData(String csvFileName)
       throws IOException, FactoryFailureException {
     // creates a buffered reader out of the fileName created
-    //TODO: build in safeguards against outside file access
+    // TODO: build in safeguards against outside file access
     BufferedReader csv = new BufferedReader(new FileReader(csvFileName));
 
     // creates an object creator to pass to parse
@@ -98,7 +98,7 @@ public class LoadCSV implements Route {
     }
   }
 
-//  public record NoFilepathProvidedResponse(){
-//
-//  }
+  //  public record NoFilepathProvidedResponse(){
+  //
+  //  }
 }
