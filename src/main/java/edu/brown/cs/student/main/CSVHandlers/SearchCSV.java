@@ -46,11 +46,6 @@ public class SearchCSV implements Route {
       } catch (NumberFormatException e) {
         headerSearch = true;
       }
-      try {
-        results = new Search(this.data, value, headerSearch, identifier).getResults();
-      } catch (ValueNotFoundException e) {
-        return new InvalidSearchResponse(e.getMessage()).serialize();
-      }
     }
       if (results.size() == 0) {
         responseMap.put("search_result", "failure");
