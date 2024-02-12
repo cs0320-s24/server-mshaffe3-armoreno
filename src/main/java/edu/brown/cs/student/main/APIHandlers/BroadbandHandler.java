@@ -25,9 +25,13 @@ public class BroadbandHandler implements Route {
 
     Moshi moshi = new Moshi.Builder().build();
 
-    Type mapStringObject = Types.newParameterizedType(Map.class, String.class, Object.class);
-    JsonAdapter<Map<String, Object>> adapter = moshi.adapter(mapStringObject);
-    Map<String, Object> responseMap = new HashMap<>();
+    //creates adapter to format information into a JSON map
+    Type mapStringString = Types.newParameterizedType(Map.class, String.class, String.class);
+    JsonAdapter<Map<String, String>> adapter = moshi.adapter(mapStringString);
+
+    //map to put results and send back to user
+    Map<String, String> responseMap = new HashMap<>();
+
 
     String targetState = request.queryParams("state");
     String county = request.queryParams("county");
@@ -45,13 +49,14 @@ public class BroadbandHandler implements Route {
 //    try{
 //      try{
 
+        //gets data using above parameters and querying the api
         BroadbandData data = this.proxy.getBroadbandData(new String[]{targetState, county});
-        // Building responses *IS* the job of this class:
+        // If getBroadbandData returns with no issue, build response
         responseMap.put("type", "success");
 
         // want to return broadband percentage and time accessed
-        responseMap.put("Broadband", data.percentage());
-        responseMap.put("Date Accessed", data.dateTime().getTime());
+        responseMap.put("Broadband", data.percentage().percentage());
+        responseMap.put("Date Accessed", data.dateTime().getTime().toString());
         responseMap.put("State", data.state());
         responseMap.put("County", data.county());
 
@@ -62,6 +67,7 @@ public class BroadbandHandler implements Route {
 //      responseMap.put("result", e.getMessage());
 //    }
 
+      //return response in form of json to post to page
     return adapter.toJson(responseMap);
   }
 }
