@@ -19,11 +19,11 @@ public class ACSDataSource {
 
   private int getCounty(String targetState, String county) {
 
-    return 0;
+    return 31;
   }
 
   private int getState(String county) {
-    return 0;
+    return 6;
   }
 
   public BroadbandData getBroadbandData(String state, String county) throws IOException {
