@@ -21,7 +21,7 @@ public class BroadbandHandler implements Route {
   }
 
   @Override
-  public Object handle(Request request, Response response) throws IOException {
+  public Object handle(Request request, Response response){
 
     Moshi moshi = new Moshi.Builder().build();
 
@@ -42,14 +42,25 @@ public class BroadbandHandler implements Route {
       return adapter.toJson(responseMap);
     }
 
+    try{
+      try{
+        BroadbandData data = this.proxy.getBroadbandData(targetState, county);
+        // Building responses *IS* the job of this class:
+        responseMap.put("type", "success");
 
-    BroadbandData data = this.proxy.getBroadbandData(targetState, county);
-    // Building responses *IS* the job of this class:
-    responseMap.put("type", "success");
+        // want to return broadband percentage and time accessed
+        responseMap.put("Broadband", data.percentage());
+        responseMap.put("Date Accessed", data.dateTime().getTime());
+        responseMap.put("State", data.state());
+        responseMap.put("County", data.county());
 
-    // want to return broadband percentage and time accessed
-    responseMap.put("Broadband", data.percentage());
-    responseMap.put("Date Accessed", data.dateTime().getTime());
+      }catch (IOException ioException){
+        responseMap.put("result", ioException.getMessage());
+      }
+    }catch (DatasourceException e){
+      responseMap.put("result", e.getMessage());
+    }
+
     return adapter.toJson(responseMap);
   }
 }

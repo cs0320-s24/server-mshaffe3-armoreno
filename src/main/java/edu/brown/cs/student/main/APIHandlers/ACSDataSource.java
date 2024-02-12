@@ -17,20 +17,24 @@ public class ACSDataSource {
 
   Map<String, String> stateCodes;
 
-  private int getCounty(String targetState, String county) {
+  private String getCounty(String targetState, String county) {
 
-    return 31;
+    return "031";
   }
 
-  private int getState(String county) {
-    return 6;
+  private String getState(String county) {
+
+    return "06";
   }
 
-  public BroadbandData getBroadbandData(String state, String county) throws IOException {
-    return getBroadbandData(getState(state), getCounty(county, state));
-  }
+//  public BroadbandData getBroadbandData(String state, String county) throws IOException {
+//    return getBroadbandData(state, county);
+//  }
 
-  private BroadbandData getBroadbandData(int stateCode, int countyCode) throws IOException {
+  public BroadbandData getBroadbandData(String state, String county) throws IOException, DatasourceException {
+
+    String stateCode = getState(state);
+    String countyCode = getCounty(county, state);
     URL requestURL =
         new URL(
             "https",
@@ -38,7 +42,7 @@ public class ACSDataSource {
             "/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:"
                 + countyCode
                 + "&in=state:"
-                + stateCode);
+                + stateCode +"&key=c62c39cc48683fae5510e74dbad5e1aa8cd6ed5a");
 
     HttpURLConnection clientConnection = connect(requestURL);
 
@@ -53,20 +57,20 @@ public class ACSDataSource {
     // disconnects connection from api
     clientConnection.disconnect();
 
-    return new BroadbandData(body, Calendar.getInstance());
+    return new BroadbandData(body, Calendar.getInstance(), state, county);
   }
 
-  private static HttpURLConnection connect(URL requestURL) throws IOException {
+  private static HttpURLConnection connect(URL requestURL) throws IOException, DatasourceException {
 
     // connects with api
     URLConnection urlConnection = requestURL.openConnection();
-    //        if(! (urlConnection instanceof HttpURLConnection))
-    //            throw new DatasourceException("unexpected: result of connection wasn't HTTP");
+            if(! (urlConnection instanceof HttpURLConnection))
+                throw new DatasourceException("unexpected: result of connection wasn't HTTP");
     HttpURLConnection clientConnection = (HttpURLConnection) urlConnection;
     clientConnection.connect(); // GET
-    //        if(clientConnection.getResponseCode() != 200)
-    //            throw new DatasourceException("unexpected: API connection not success status
-    // "+clientConnection.getResponseMessage());
+            if(clientConnection.getResponseCode() != 200)
+                throw new DatasourceException("unexpected: API connection not success status"
+                        +clientConnection.getResponseMessage());
     return clientConnection;
   }
 }

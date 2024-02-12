@@ -2,14 +2,16 @@ package APIHandlers;
 
 import Broadband.BroadbandData;
 
+import java.io.IOException;
+
 public class ACSProxy {
  ACSDataSource source;
 
   public ACSProxy() {
     this.source = new ACSDataSource();
   }
-  public BroadbandData getBroadbandData(int state, int county) {
-    return null;
+  public BroadbandData getBroadbandData(String state, String county) throws IOException, DatasourceException {
+    return this.source.getBroadbandData(state, county);
   }
 //    LoadingCache<Key, Graph> graphs = CacheBuilder.newBuilder()
 //        .maximumSize(1000)
@@ -29,5 +31,3 @@ public class ACSProxy {
 
   }
 
-
-}
