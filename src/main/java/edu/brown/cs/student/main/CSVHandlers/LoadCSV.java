@@ -4,6 +4,7 @@ import CSVHandlers.SearchFunctionality.Creators.CreatorFromRow;
 import CSVHandlers.SearchFunctionality.Creators.StringCreator;
 import CSVHandlers.SearchFunctionality.FactoryFailureException;
 import CSVHandlers.SearchFunctionality.Parser;
+import CSVHandlers.Proxy;
 import com.squareup.moshi.Moshi;
 import java.io.BufferedReader;
 import java.io.FileReader;

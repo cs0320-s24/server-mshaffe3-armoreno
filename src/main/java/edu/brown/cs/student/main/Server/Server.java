@@ -1,4 +1,4 @@
-package server;
+package Server;
 
 import static spark.Spark.after;
 
@@ -12,7 +12,7 @@ import spark.Spark;
 
 public class Server {
   public static void main(String[] args) {
-    int port = 3232;
+    int port = 3535;
     Spark.port(port);
 
     // NOTE: we need to change the value from * to 'origins we trust'
