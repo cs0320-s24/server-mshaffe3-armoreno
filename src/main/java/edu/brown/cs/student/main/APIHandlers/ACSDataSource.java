@@ -12,7 +12,7 @@ import java.util.Calendar;
 import java.util.Map;
 import okio.Buffer;
 
-public class ACSDataSource {
+public class ACSDataSource implements APISource{
 
   Map<String, String> stateCodes;
 
@@ -25,8 +25,9 @@ public class ACSDataSource {
     return 6;
   }
 
-  public BroadbandData getBroadbandData(String state, String county) throws IOException {
-    return getBroadbandData(getState(state), getCounty(county, state));
+  @Override
+  public BroadbandData getBroadbandData(String[] loc) throws IOException {
+    return getBroadbandData(getState(loc[0]), getCounty(loc[0], loc[1]));
   }
 
   private BroadbandData getBroadbandData(int stateCode, int countyCode) throws IOException {

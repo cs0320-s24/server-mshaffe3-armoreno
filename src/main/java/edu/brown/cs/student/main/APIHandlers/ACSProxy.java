@@ -7,7 +7,7 @@ import com.google.common.cache.LoadingCache;
 import java.util.Collection;
 
 
-public class ACSProxy {
+public class ACSProxy implements APISource{
 
   private final ACSDataSource source;
   private final LoadingCache<String[], BroadbandData> cache;
@@ -18,7 +18,7 @@ public class ACSProxy {
   public ACSProxy() {
     this.source = new ACSDataSource();
     this.cache = CacheBuilder.newBuilder().build(
-        new CacheLoader<String[], BroadbandData>() {
+        new CacheLoader<>() {
           @Override
           public BroadbandData load(String[] loc) throws Exception {
             return source.getBroadbandData(loc);
@@ -27,6 +27,7 @@ public class ACSProxy {
     );
   }
 
+  @Override
   public BroadbandData getBroadbandData(String[] loc) {
     // "get" is designed for concurrent situations; for today, use getUnchecked:
     BroadbandData result = cache.getUnchecked(loc);
