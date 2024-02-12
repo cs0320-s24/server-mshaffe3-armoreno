@@ -4,6 +4,7 @@ import Broadband.BroadbandData;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import java.io.IOException;
 import java.util.Collection;
 
 public class ACSProxy implements APISource{
@@ -12,8 +13,9 @@ public class ACSProxy implements APISource{
   private final LoadingCache<String[], BroadbandData> cache;
 
 
-  public ACSProxy() {
+  public ACSProxy() throws DatasourceException, IOException {
     this.source = new ACSDataSource();
+
 
     this.cache = CacheBuilder.newBuilder().build(
         new CacheLoader<>() {

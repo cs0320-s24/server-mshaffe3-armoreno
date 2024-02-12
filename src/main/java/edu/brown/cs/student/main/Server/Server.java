@@ -5,14 +5,16 @@ import static spark.Spark.after;
 import APIHandlers.ACSDataSource;
 import APIHandlers.ACSProxy;
 import APIHandlers.BroadbandHandler;
+import APIHandlers.DatasourceException;
 import CSVHandlers.CSVDataSource;
 import CSVHandlers.LoadCSV;
 import CSVHandlers.SearchCSV;
 import CSVHandlers.ViewCSV;
+import java.io.IOException;
 import spark.Spark;
 
 public class Server {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws DatasourceException, IOException {
     int port = 3535;
     Spark.port(port);
 

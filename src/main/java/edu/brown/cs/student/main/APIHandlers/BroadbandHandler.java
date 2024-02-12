@@ -32,7 +32,6 @@ public class BroadbandHandler implements Route {
     //map to put results and send back to user
     Map<String, String> responseMap = new HashMap<>();
 
-
     String targetState = request.queryParams("state");
     String county = request.queryParams("county");
 
@@ -68,6 +67,7 @@ public class BroadbandHandler implements Route {
 //    }
 
       //return response in form of json to post to page
+
     return adapter.toJson(responseMap);
   }
 }
