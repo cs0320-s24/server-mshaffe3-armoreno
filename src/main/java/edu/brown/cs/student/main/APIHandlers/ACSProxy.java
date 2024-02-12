@@ -11,9 +11,7 @@ public class ACSProxy implements APISource{
   private final ACSDataSource source;
   private final LoadingCache<String[], BroadbandData> cache;
 
-  /**
-   *
-   */
+
   public ACSProxy() {
     this.source = new ACSDataSource();
 
@@ -23,7 +21,7 @@ public class ACSProxy implements APISource{
           public BroadbandData load(String[] loc) throws Exception {
             return source.getBroadbandData(loc);
           }
-        }
+        } //TODO figure out how to catch the exception from the cache
     );
   }
 
