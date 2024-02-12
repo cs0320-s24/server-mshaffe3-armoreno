@@ -13,15 +13,15 @@ import spark.Route;
 
 public class SearchCSV implements Route {
   List<List<String>> data;
-  Proxy proxy;
+  CSVDataSource CSVDataSource;
 
-  public SearchCSV(Proxy proxy) {
-    this.proxy = proxy;
+  public SearchCSV(CSVDataSource CSVDataSource) {
+    this.CSVDataSource = CSVDataSource;
   }
 
   @Override
   public Object handle(Request request, Response response) {
-    this.data = proxy.getData();
+    this.data = CSVDataSource.getData();
     String value = request.queryParams("value");
     List<List<String>> results;
     String identifier = request.queryParams("identifier");

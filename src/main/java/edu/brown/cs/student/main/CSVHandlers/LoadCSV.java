@@ -14,10 +14,10 @@ import spark.Response;
 import spark.Route;
 
 public class LoadCSV implements Route {
-  private final Proxy proxy;
+  private final CSVDataSource CSVDataSource;
 
-  public LoadCSV(Proxy proxy) {
-    this.proxy = proxy;
+  public LoadCSV(CSVDataSource CSVDataSource) {
+    this.CSVDataSource = CSVDataSource;
   }
 
   @Override
@@ -29,7 +29,7 @@ public class LoadCSV implements Route {
 
     try {
       List<List<String>> parsedData = this.parseData(filepath);
-      this.proxy.setData(parsedData);
+      this.CSVDataSource.setData(parsedData);
     } catch (IOException | FactoryFailureException e) {
       System.out.println(e.getMessage());
       return new FileLoadFailureResponse(filepath).serialize();

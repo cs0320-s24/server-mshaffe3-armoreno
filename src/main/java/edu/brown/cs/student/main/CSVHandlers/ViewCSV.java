@@ -2,7 +2,6 @@ package CSVHandlers;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
-import java.util.ArrayList;
 import java.util.List;
 import spark.Request;
 import spark.Response;
@@ -10,15 +9,15 @@ import spark.Route;
 
 public class ViewCSV implements Route {
   List<List<String>> data;
-  Proxy proxy;
+  CSVDataSource CSVDataSource;
 
-  public ViewCSV(Proxy proxy) { // proxy is created in load, but
-    this.proxy = proxy;
+  public ViewCSV(CSVDataSource CSVDataSource) { // proxy is created in load, but
+    this.CSVDataSource = CSVDataSource;
   }
 
   @Override
   public Object handle(Request request, Response response) {
-    this.data = proxy.getData();
+    this.data = CSVDataSource.getData();
 
     // If there has not been a loaded file/empty file, return a load failure response
     if (this.data.size() == 0) {

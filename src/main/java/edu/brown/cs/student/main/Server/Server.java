@@ -5,7 +5,7 @@ import static spark.Spark.after;
 import APIHandlers.ACSDataSource;
 import APIHandlers.BroadbandHandler;
 import CSVHandlers.LoadCSV;
-import CSVHandlers.Proxy;
+import CSVHandlers.CSVDataSource;
 import CSVHandlers.SearchCSV;
 import CSVHandlers.ViewCSV;
 import spark.Spark;
@@ -21,12 +21,12 @@ public class Server {
           response.header("Access-Control-Allow-Origin", "*");
           response.header("Access-Control-Allow-Methods", "*");
         });
-    Proxy proxy = new Proxy();
+    CSVDataSource CSVDataSource = new CSVDataSource();
 
     // Setting up the handler for the GET /order and /activity endpoints
-    Spark.get("loadcsv", new LoadCSV(proxy));
-    Spark.get("viewcsv", new ViewCSV(proxy));
-    Spark.get("searchcsv", new SearchCSV(proxy));
+    Spark.get("loadcsv", new LoadCSV(CSVDataSource));
+    Spark.get("viewcsv", new ViewCSV(CSVDataSource));
+    Spark.get("searchcsv", new SearchCSV(CSVDataSource));
     Spark.get("broadband", new BroadbandHandler(new ACSDataSource()));
     Spark.init();
     Spark.awaitInitialization();

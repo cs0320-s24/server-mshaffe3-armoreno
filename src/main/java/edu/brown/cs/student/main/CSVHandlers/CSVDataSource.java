@@ -3,12 +3,13 @@ package CSVHandlers;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Proxy {
+public class CSVDataSource {
   List<List<String>> data;
 
-  public Proxy() {}
 
-  // cache contained here!
+  public CSVDataSource() {}
+
+  //data state kept here
   public void setData(List<List<String>> data) {
     this.data = data;
   }
