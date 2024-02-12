@@ -54,10 +54,10 @@ public class BroadbandHandler implements Route {
         responseMap.put("type", "success");
 
         // want to return broadband percentage and time accessed
-        responseMap.put("Broadband", data.percentage().percentage());
-        responseMap.put("Date Accessed", data.dateTime().getTime().toString());
-        responseMap.put("State", data.state());
-        responseMap.put("County", data.county());
+        responseMap.put("broadband", data.percentage().percentage());
+        responseMap.put("date accessed", data.dateTime().getTime().toString());
+        responseMap.put("state", data.state());
+        responseMap.put("county", data.county());
 
 //      }catch (IOException ioException){
 //        responseMap.put("result", ioException.getMessage());

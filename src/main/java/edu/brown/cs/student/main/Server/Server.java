@@ -13,6 +13,8 @@ import CSVHandlers.ViewCSV;
 import java.io.IOException;
 import spark.Spark;
 
+import java.io.IOException;
+
 public class Server {
   public static void main(String[] args) throws DatasourceException, IOException {
     int port = 3535;

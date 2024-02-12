@@ -5,7 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
-import java.util.Collection;
+
 
 public class ACSProxy implements APISource{
 
