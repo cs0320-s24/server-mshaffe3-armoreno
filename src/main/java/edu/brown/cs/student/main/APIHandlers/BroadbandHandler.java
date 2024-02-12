@@ -14,14 +14,14 @@ import spark.Route;
 
 public class BroadbandHandler implements Route {
 
-  ACSDataSource proxy;
+  ACSProxy proxy;
 
-  public BroadbandHandler(ACSDataSource proxy) {
+  public BroadbandHandler(ACSProxy proxy) {
     this.proxy = proxy;
   }
 
   @Override
-  public Object handle(Request request, Response response) throws DatasourceException, IOException {
+  public Object handle(Request request, Response response) {
 
     Moshi moshi = new Moshi.Builder().build();
 

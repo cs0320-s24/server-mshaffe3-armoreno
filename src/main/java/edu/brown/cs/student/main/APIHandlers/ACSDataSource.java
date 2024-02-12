@@ -8,7 +8,6 @@ import com.squareup.moshi.Types;
 import java.lang.reflect.Type;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
@@ -20,31 +19,42 @@ import okio.Buffer;
 
 
 public class ACSDataSource implements APISource{
-  private Map<String, String> stateCodes;
-
+  private final Map<String, String> stateCodes;
 
   public ACSDataSource() throws DatasourceException, IOException {
     //instantiate hashMap
     this.stateCodes = new HashMap<>();
-
     //request from api
-    List<List<String>> body = this.getBody( new URL(
-            "https",
-            "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=state:*"));
 
+    List<List<String>> body = this.getBody(new URL("https","api.census.gov",
+        "/data/2010/dec/sf1?get=NAME&for=state:*"));
     this.buildMap(body);
   }
 
-  private void buildMap(List<List<String>> body) {
-    body.remove(0);
-    for(List<String> pair : body){
-      this.stateCodes.put(pair.get(0).toLowerCase(Locale.US), pair.get(1).toLowerCase(Locale.US));
+  private void buildMap(List<List<String>> stateData) {
+    stateData.remove(0);
+    for(List<String> row: stateData){
+      this.stateCodes.put(row.get(0).toLowerCase(Locale.US), row.get(1).toLowerCase(Locale.US));
     }
   }
 
-  private String getCounty(String targetState, String county) {
+  private String getCounty(String stateName, String countyName)
+      throws IOException, DatasourceException {
 
-    return "015";
+    String stateCode = stateCodes.get(stateName);
+
+    List<List<String>> body = this.getBody(new URL(
+            "https",
+            "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=county:*&in=state:"+
+        stateCode));
+
+    for(List<String> county:body){
+      if(county.get(0).toLowerCase(Locale.US).contains(countyName)){
+        System.out.println(county);
+        return county.get(2).toLowerCase(Locale.US);
+      }
+    }
+    throw new DatasourceException("No such county in provided state.");
   }
 
   private String getState(String state) {
@@ -59,8 +69,8 @@ public class ACSDataSource implements APISource{
   private BroadbandData queryACS(String state, String county) throws IOException, DatasourceException {
 
     //convert names into codes
-    String stateCode = getState(state);
-    String countyCode = getCounty(county, state);
+    String stateCode = getState(state.toLowerCase(Locale.US));
+    String countyCode = getCounty(state.toLowerCase(Locale.US), county.toLowerCase(Locale.US));
 
     //create moshi adapter to parse response from api
 

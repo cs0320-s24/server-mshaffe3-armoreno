@@ -27,8 +27,7 @@ public class Server {
           response.header("Access-Control-Allow-Methods", "*");
         });
     CSVDataSource CSVDataSource = new CSVDataSource();
-    //ACSProxy proxy = new ACSProxy();
-    ACSDataSource proxy = new ACSDataSource();
+    ACSProxy proxy = new ACSProxy();
     // Setting up the handler for the GET /order and /activity endpoints
     Spark.get("loadcsv", new LoadCSV(CSVDataSource));
     Spark.get("viewcsv", new ViewCSV(CSVDataSource));
