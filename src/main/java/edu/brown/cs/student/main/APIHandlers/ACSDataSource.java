@@ -38,34 +38,64 @@ public class ACSDataSource implements APISource{
     }
   }
 
+  /**
+   * returns the ACS county code given a state name and county name by querying the API
+   * @param stateName
+   * @param countyName
+   * @return
+   * @throws IOException
+   * @throws DatasourceException
+   */
   private String getCounty(String stateName, String countyName)
       throws IOException, DatasourceException {
 
     String stateCode = stateCodes.get(stateName);
-
+    //queries the API with a given state code
     List<List<String>> body = this.getBody(new URL(
             "https",
             "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=county:*&in=state:"+
         stateCode));
 
+    //searches for the correct county
     for(List<String> county:body){
       if(county.get(0).toLowerCase(Locale.US).contains(countyName)){
-        System.out.println(county);
-        return county.get(2).toLowerCase(Locale.US);
+        //returns county code
+        return county.get(2);
       }
     }
     throw new DatasourceException("No such county in provided state.");
   }
 
+  /**
+   * accesses the Hashmap created in the constructor of the class to return the state code
+   * @param state
+   * @return
+   */
   private String getState(String state) {
     return this.stateCodes.get(state.toLowerCase(Locale.US));
   }
 
+  /**
+   * Returns a query from the ACS API in the form of broadband data
+   * @param loc
+   * @return
+   * @throws IOException
+   * @throws DatasourceException
+   */
   @Override
   public BroadbandData getBroadbandData(String[] loc) throws IOException, DatasourceException {
     return queryACS(loc[0], loc[1]);
   }
 
+  /**
+   * Helper method that creates the URL and builds the record of Broadband Data from the
+   * body returned from the query
+   * @param state
+   * @param county
+   * @return
+   * @throws IOException
+   * @throws DatasourceException
+   */
   private BroadbandData queryACS(String state, String county) throws IOException, DatasourceException {
 
     //convert names into codes
@@ -100,6 +130,13 @@ public class ACSDataSource implements APISource{
     return clientConnection;
   }
 
+  /**
+   * The helper method queries the API at the requested URL and uses moshi to deserialize it
+   * @param requestURL
+   * @return
+   * @throws IOException
+   * @throws DatasourceException
+   */
   private List<List<String>> getBody(URL requestURL) throws IOException, DatasourceException {
 
     HttpURLConnection clientConnection = connect(requestURL);
