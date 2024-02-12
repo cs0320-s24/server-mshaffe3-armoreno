@@ -2,7 +2,6 @@ package APIHandlers;
 
 import Broadband.Broadband;
 import Broadband.BroadbandData;
-import Broadband.BroadbandWrapper;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
@@ -11,27 +10,43 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import okio.Buffer;
 
 public class ACSDataSource implements APISource{
 
   Map<String, String> stateCodes;
 
-  private String getCounty(String targetState, String county) {
+  public ACSDataSource() throws DatasourceException, IOException {
+    //instantiate hashMap
+    this.stateCodes = new HashMap<>();
 
-    return "031";
+    //request from api
+    List<List<String>> body = this.getBody( new URL(
+            "https",
+            "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=state:*"));
+
+    this.buildMap(body);
   }
 
-  private String getState(String county) {
+  private void buildMap(List<List<String>> body) {
+    for(List<String> pair : body){
+      this.stateCodes.put(pair.get(0).toLowerCase(Locale.US), pair.get(1).toLowerCase(Locale.US));
+    }
+  }
 
-    return "06";
+  private String getCounty(String targetState, String county) {
+
+    return "015";
+  }
+
+  private String getState(String state) {
+    return this.stateCodes.get(state.toLowerCase(Locale.US));
   }
   @Override
   public BroadbandData getBroadbandData(String[] loc) throws IOException, DatasourceException {
-    return getBroadbandData(getState(loc[0]), getCounty(loc[0], loc[1]));
+    return getBroadbandData(loc[0], loc[1]);
   }
 
   public BroadbandData getBroadbandData(String state, String county) throws IOException, DatasourceException {
@@ -40,39 +55,27 @@ public class ACSDataSource implements APISource{
     String stateCode = getState(state);
     String countyCode = getCounty(county, state);
 
-    //query the api with above quotes
-    URL requestURL =
-        new URL(
+    //create moshi adapter to parse response from api
+
+    List<List<String>> body = getBody(new URL(
             "https",
             "api.census.gov",
             "/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:"
-                + countyCode
-                + "&in=state:"
-                + stateCode
-                    +"&key=c62c39cc48683fae5510e74dbad5e1aa8cd6ed5a");
-
-    HttpURLConnection clientConnection = connect(requestURL);
-
-    //create moshi adapter to parse response from api
-    Moshi moshi = new Moshi.Builder().build();
-    Type listType = Types.newParameterizedType(List.class, List.class);
-    JsonAdapter<List<List<String>>> adapter = moshi.adapter(listType);
-    List<List<String>> body = adapter.fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
+                    + countyCode
+                    + "&in=state:"
+                    + stateCode
+                    +"&key=c62c39cc48683fae5510e74dbad5e1aa8cd6ed5a"));
 
     //if body is null, throw an error
     if(body == null){
       throw new DatasourceException("unexpected: No information to parse");
     }
 
-    // disconnects connection from api
-    clientConnection.disconnect();
-
     //returns data needed in the form of a Broadband data
     return new BroadbandData(new Broadband(body.get(1).get(1)), Calendar.getInstance(), state, county);
   }
 
   private static HttpURLConnection connect(URL requestURL) throws IOException, DatasourceException {
-
     // connects with api and requests
     URLConnection urlConnection = requestURL.openConnection();
             if(! (urlConnection instanceof HttpURLConnection clientConnection))
@@ -82,5 +85,17 @@ public class ACSDataSource implements APISource{
                 throw new DatasourceException("unexpected: API connection not success status"
                         +clientConnection.getResponseMessage());
     return clientConnection;
+  }
+
+  private List<List<String>> getBody(URL requestURL) throws IOException, DatasourceException {
+
+    HttpURLConnection clientConnection = connect(requestURL);
+
+    Moshi moshi = new Moshi.Builder().build();
+    Type listType = Types.newParameterizedType(List.class, List.class);
+    JsonAdapter<List<List<String>>> adapter = moshi.adapter(listType);
+    List<List<String>> body = adapter.fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
+    clientConnection.disconnect();
+    return body;
   }
 }
