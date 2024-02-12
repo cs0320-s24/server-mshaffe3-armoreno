@@ -36,8 +36,11 @@ public class ACSDataSource implements APISource{
 
   public BroadbandData getBroadbandData(String state, String county) throws IOException, DatasourceException {
 
+    //convert names into codes
     String stateCode = getState(state);
     String countyCode = getCounty(county, state);
+
+    //query the api with above quotes
     URL requestURL =
         new URL(
             "https",
@@ -50,29 +53,31 @@ public class ACSDataSource implements APISource{
 
     HttpURLConnection clientConnection = connect(requestURL);
 
-
+    //create moshi adapter to parse response from api
     Moshi moshi = new Moshi.Builder().build();
-
     Type listType = Types.newParameterizedType(List.class, List.class);
     JsonAdapter<List<List<String>>> adapter = moshi.adapter(listType);
     List<List<String>> body = adapter.fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
 
-    System.out.println("here");
-    System.out.println(body.get(1).get(1));
+    //if body is null, throw an error
+    if(body == null){
+      throw new DatasourceException("unexpected: No information to parse");
+    }
 
     // disconnects connection from api
     clientConnection.disconnect();
+
+    //returns data needed in the form of a Broadband data
     return new BroadbandData(new Broadband(body.get(1).get(1)), Calendar.getInstance(), state, county);
   }
 
   private static HttpURLConnection connect(URL requestURL) throws IOException, DatasourceException {
 
-    // connects with api
+    // connects with api and requests
     URLConnection urlConnection = requestURL.openConnection();
-            if(! (urlConnection instanceof HttpURLConnection))
+            if(! (urlConnection instanceof HttpURLConnection clientConnection))
                 throw new DatasourceException("unexpected: result of connection wasn't HTTP");
-    HttpURLConnection clientConnection = (HttpURLConnection) urlConnection;
-    clientConnection.connect(); // GET
+      clientConnection.connect(); // GET
             if(clientConnection.getResponseCode() != 200)
                 throw new DatasourceException("unexpected: API connection not success status"
                         +clientConnection.getResponseMessage());
