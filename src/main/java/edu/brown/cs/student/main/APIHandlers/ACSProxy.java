@@ -1,10 +1,17 @@
 package APIHandlers;
 import
 
+import Broadband.BroadbandData;
+
 public class ACSProxy {
+ ACSDataSource source;
 
-
-  public ACSProxy(){
+  public ACSProxy() {
+    this.source = new ACSDataSource();
+  }
+  public BroadbandData getBroadbandData(int state, int county) {
+    return null;
+  }
 //    LoadingCache<Key, Graph> graphs = CacheBuilder.newBuilder()
 //        .maximumSize(1000)
 //        .build(
