@@ -14,6 +14,9 @@ public class Proxy {
   }
 
   public List<List<String>> getData() {
+    if(data==null){
+      return new ArrayList<>();
+    }
     return new ArrayList<>(data);
   }
 }

@@ -30,6 +30,10 @@ public class SearchCSV implements Route {
     responseMap.put("value_query", value);
     responseMap.put("column_identifier", identifier);
 
+    if(value ==null){
+      return new InvalidSearchResponse("no search value provided");
+    }
+
     // headers boolean true = words, false = index
     if (identifier == null) {
       // Search without column identifier
@@ -45,17 +49,16 @@ public class SearchCSV implements Route {
       try {
         results = new Search(this.data, value, headerSearch, identifier).getResults();
       } catch (ValueNotFoundException e) {
-        return new InvalidSearchResponse(responseMap).serialize();
-      }
-      if (results.size() == 0) {
-        responseMap.put("Search results for " + value, "failure");
-      } else {
-        responseMap.put("Search results for " + value, "success");
-        for (List<String> result : results) {
-          responseMap.put("Match #" + results.indexOf(result), result);
-        }
+        return new InvalidSearchResponse(e.getMessage()).serialize();
       }
     }
+      if (results.size() == 0) {
+        responseMap.put("search_result", "failure");
+      } else {
+        responseMap.put("search_result", "success");
+        responseMap.put("data", results);
+      }
+
     return new SearchResultResponse(responseMap).serialize();
   }
 
@@ -77,7 +80,9 @@ public class SearchCSV implements Route {
     }
   }
 
-  private record InvalidSearchResponse(Map<String, Object> responseMap) {
+  private record InvalidSearchResponse(String failureReason) {
+
+
     String serialize() {
       try {
         Moshi moshi = new Moshi.Builder().build();

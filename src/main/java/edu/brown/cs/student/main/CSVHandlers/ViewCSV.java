@@ -17,10 +17,11 @@ public class ViewCSV implements Route {
   }
 
   @Override
-  public Object handle(Request request, Response response) throws Exception {
+  public Object handle(Request request, Response response) {
     this.data = proxy.getData();
+
     // If there has not been a loaded file/empty file, return a load failure response
-    if (this.data.equals(new ArrayList<>())) {
+    if (this.data.size() == 0) {
       return new NoFileLoadedResponse().serialize();
     }
     return new ViewLoadedResponse(data).serialize();
@@ -30,11 +31,11 @@ public class ViewCSV implements Route {
    * Response for successfully accessed loaded file
    *
    * @param response_type
-   * @param csv
+   * @param data
    */
-  public record ViewLoadedResponse(String response_type, List<List<String>> csv) {
-    public ViewLoadedResponse(List<List<String>> csv) {
-      this("fileViewSuccess", csv);
+  public record ViewLoadedResponse(String response_type, List<List<String>> data) {
+    public ViewLoadedResponse(List<List<String>> data) {
+      this("fileViewSuccess", data);
     }
     /**
      * @return this response, serialized as Json
@@ -57,7 +58,7 @@ public class ViewCSV implements Route {
 
   public record NoFileLoadedResponse(String response_type) {
     public NoFileLoadedResponse() {
-      this("fileViewFailure");
+      this("noFileLoadedFailure");
     }
     /**
      * @return this response, serialized as Json
