@@ -8,15 +8,20 @@ import com.squareup.moshi.Types;
 import java.lang.reflect.Type;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import okio.Buffer;
 
-public class ACSDataSource implements APISource{
 
-  Map<String, String> stateCodes;
+public class ACSDataSource implements APISource{
+  private Map<String, String> stateCodes;
+
 
   public ACSDataSource() throws DatasourceException, IOException {
     //instantiate hashMap
@@ -31,6 +36,7 @@ public class ACSDataSource implements APISource{
   }
 
   private void buildMap(List<List<String>> body) {
+    body.remove(0);
     for(List<String> pair : body){
       this.stateCodes.put(pair.get(0).toLowerCase(Locale.US), pair.get(1).toLowerCase(Locale.US));
     }
@@ -44,12 +50,13 @@ public class ACSDataSource implements APISource{
   private String getState(String state) {
     return this.stateCodes.get(state.toLowerCase(Locale.US));
   }
+
   @Override
   public BroadbandData getBroadbandData(String[] loc) throws IOException, DatasourceException {
-    return getBroadbandData(loc[0], loc[1]);
+    return queryACS(loc[0], loc[1]);
   }
 
-  public BroadbandData getBroadbandData(String state, String county) throws IOException, DatasourceException {
+  private BroadbandData queryACS(String state, String county) throws IOException, DatasourceException {
 
     //convert names into codes
     String stateCode = getState(state);
@@ -66,10 +73,6 @@ public class ACSDataSource implements APISource{
                     + stateCode
                     +"&key=c62c39cc48683fae5510e74dbad5e1aa8cd6ed5a"));
 
-    //if body is null, throw an error
-    if(body == null){
-      throw new DatasourceException("unexpected: No information to parse");
-    }
 
     //returns data needed in the form of a Broadband data
     return new BroadbandData(new Broadband(body.get(1).get(1)), Calendar.getInstance(), state, county);

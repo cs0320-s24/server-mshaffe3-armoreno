@@ -3,6 +3,10 @@ package CSVHandlers;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class serves as a proxy and defensive programming mechanism to protect the modification of
+ * parsed data
+ */
 public class CSVDataSource {
   List<List<String>> data;
 
