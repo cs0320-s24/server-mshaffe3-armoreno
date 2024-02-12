@@ -8,33 +8,34 @@ import com.squareup.moshi.Moshi;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
 public class LoadCSV implements Route {
-  private final Proxy proxy;
+  private final CSVDataSource CSVDataSource;
 
-  public LoadCSV(Proxy proxy) {
-    this.proxy = proxy;
+  public LoadCSV(CSVDataSource CSVDataSource) {
+    this.CSVDataSource = CSVDataSource;
   }
 
   @Override
   public Object handle(Request request, Response response) {
-    Map<String, Object> responseMap = new HashMap<>();
     String filepath = request.queryParams("filepath");
-    responseMap.put("filepath", filepath);
-    try {
-      List<List<String>> parsedData = this.parseData(filepath);
-      this.proxy.setData(parsedData);
-    } catch (IOException | FactoryFailureException e) {
-      return new FileLoadFailureResponse(responseMap).serialize();
+    if(filepath ==null){
+      return new FileLoadFailureResponse("no filepath provided");
     }
 
-    return new FileLoadSuccessResponse(responseMap).serialize();
+    try {
+      List<List<String>> parsedData = this.parseData(filepath);
+      this.CSVDataSource.setData(parsedData);
+    } catch (IOException | FactoryFailureException e) {
+      System.out.println(e.getMessage());
+      return new FileLoadFailureResponse(filepath).serialize();
+    }
+
+    return new FileLoadSuccessResponse(filepath).serialize();
   }
 
   /**
@@ -48,14 +49,14 @@ public class LoadCSV implements Route {
   private List<List<String>> parseData(String csvFileName)
       throws IOException, FactoryFailureException {
     // creates a buffered reader out of the fileName created
-    BufferedReader csv = new BufferedReader(new FileReader("data/" + csvFileName));
+    //TODO: build in safeguards against outside file access
+    BufferedReader csv = new BufferedReader(new FileReader(csvFileName));
 
     // creates an object creator to pass to parse
     CreatorFromRow<List<String>> stringCreator = new StringCreator();
 
     // takes in above to create a parser object
     Parser<List<String>> parser = new Parser<>(csv, stringCreator);
-
     // returns a double array of strings from the above csv
     return parser.parse();
   }
@@ -65,9 +66,9 @@ public class LoadCSV implements Route {
    *
    * @param response_type
    */
-  public record FileLoadSuccessResponse(String response_type, Map<String, Object> responseMap) {
-    public FileLoadSuccessResponse(Map<String, Object> responseMap) {
-      this("loadSuccess", responseMap);
+  public record FileLoadSuccessResponse(String response_type, String filepath) {
+    public FileLoadSuccessResponse(String filepath) {
+      this("loadSuccess", filepath);
     }
 
     /**
@@ -84,9 +85,9 @@ public class LoadCSV implements Route {
    *
    * @param response_type
    */
-  public record FileLoadFailureResponse(String response_type, Map<String, Object> responseMap) {
-    public FileLoadFailureResponse(Map<String, Object> responseMap) {
-      this("loadFailure", responseMap);
+  public record FileLoadFailureResponse(String response_type, String filepath) {
+    public FileLoadFailureResponse(String filepath) {
+      this("loadFailure", filepath);
     }
     /**
      * @return this response, serialized as Json
@@ -96,4 +97,8 @@ public class LoadCSV implements Route {
       return moshi.adapter(FileLoadFailureResponse.class).toJson(this);
     }
   }
+
+//  public record NoFilepathProvidedResponse(){
+//
+//  }
 }

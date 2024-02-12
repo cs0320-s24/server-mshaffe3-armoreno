@@ -2,7 +2,6 @@ package CSVHandlers;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
-import java.util.ArrayList;
 import java.util.List;
 import spark.Request;
 import spark.Response;
@@ -10,17 +9,18 @@ import spark.Route;
 
 public class ViewCSV implements Route {
   List<List<String>> data;
-  Proxy proxy;
+  CSVDataSource CSVDataSource;
 
-  public ViewCSV(Proxy proxy) { // proxy is created in load, but
-    this.proxy = proxy;
+  public ViewCSV(CSVDataSource CSVDataSource) { // proxy is created in load, but
+    this.CSVDataSource = CSVDataSource;
   }
 
   @Override
-  public Object handle(Request request, Response response) throws Exception {
-    this.data = proxy.getData();
+  public Object handle(Request request, Response response) {
+    this.data = CSVDataSource.getData();
+
     // If there has not been a loaded file/empty file, return a load failure response
-    if (this.data.equals(new ArrayList<>())) {
+    if (this.data.size() == 0) {
       return new NoFileLoadedResponse().serialize();
     }
     return new ViewLoadedResponse(data).serialize();
@@ -30,11 +30,11 @@ public class ViewCSV implements Route {
    * Response for successfully accessed loaded file
    *
    * @param response_type
-   * @param csv
+   * @param data
    */
-  public record ViewLoadedResponse(String response_type, List<List<String>> csv) {
-    public ViewLoadedResponse(List<List<String>> csv) {
-      this("fileViewSuccess", csv);
+  public record ViewLoadedResponse(String response_type, List<List<String>> data) {
+    public ViewLoadedResponse(List<List<String>> data) {
+      this("fileViewSuccess", data);
     }
     /**
      * @return this response, serialized as Json
@@ -57,7 +57,7 @@ public class ViewCSV implements Route {
 
   public record NoFileLoadedResponse(String response_type) {
     public NoFileLoadedResponse() {
-      this("fileViewFailure");
+      this("noFileLoadedFailure");
     }
     /**
      * @return this response, serialized as Json
