@@ -14,10 +14,10 @@ import spark.Route;
 
 public class BroadbandHandler implements Route {
 
-  ACSDataSource dataSource;
+  ACSProxy proxy;
 
-  public BroadbandHandler(ACSDataSource acsDataSource) {
-    this.dataSource = acsDataSource;
+  public BroadbandHandler(ACSProxy acsProxy) {
+    this.proxy = acsProxy;
   }
 
   @Override
@@ -42,11 +42,8 @@ public class BroadbandHandler implements Route {
       return adapter.toJson(responseMap);
     }
 
-    // Generate the reply
-    //        try {
-    // Low-level NWS API invocation isn't the job of this class!
-    // Neither is caching! Just get the data from whatever the source is.
-    BroadbandData data = this.dataSource.getBroadbandData(targetState, county);
+
+    BroadbandData data = this.proxy.getBroadbandData(targetState, county);
     // Building responses *IS* the job of this class:
     responseMap.put("type", "success");
 
