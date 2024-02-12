@@ -42,7 +42,6 @@ public class BroadbandHandler implements Route {
       return adapter.toJson(responseMap);
     }
 
-
     BroadbandData data = this.proxy.getBroadbandData(targetState, county);
     // Building responses *IS* the job of this class:
     responseMap.put("type", "success");

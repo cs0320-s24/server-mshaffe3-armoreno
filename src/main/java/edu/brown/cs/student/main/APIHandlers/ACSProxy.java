@@ -1,33 +1,38 @@
 package APIHandlers;
 
 import Broadband.BroadbandData;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.LoadingCache;
+import java.util.Collection;
+
 
 public class ACSProxy {
- ACSDataSource source;
 
+  private final ACSDataSource source;
+  private final LoadingCache<String[], BroadbandData> cache;
+
+  /**
+   *
+   */
   public ACSProxy() {
     this.source = new ACSDataSource();
-  }
-  public BroadbandData getBroadbandData(int state, int county) {
-    return null;
-  }
-//    LoadingCache<Key, Graph> graphs = CacheBuilder.newBuilder()
-//        .maximumSize(1000)
-//        .build(
-//            new CacheLoader<Key, Graph>() {
-//              public Graph load(Key key) throws AnyException {
-//                return createExpensiveGraph(key);
-//              }
-//            });
-//
-//...
-//    try {
-//      return graphs.get(key);
-//    } catch (ExecutionException e) {
-//      throw new OtherException(e.getCause());
-//    }
-
+    this.cache = CacheBuilder.newBuilder().build(
+        new CacheLoader<String[], BroadbandData>() {
+          @Override
+          public BroadbandData load(String[] loc) throws Exception {
+            return source.getBroadbandData(loc);
+          }
+        }
+    );
   }
 
-
+  public BroadbandData getBroadbandData(String[] loc) {
+    // "get" is designed for concurrent situations; for today, use getUnchecked:
+    BroadbandData result = cache.getUnchecked(loc);
+    // For debugging and demo (would remove in a "real" version):
+    System.out.println(cache.stats());
+    return result;
+  }
 }
+
