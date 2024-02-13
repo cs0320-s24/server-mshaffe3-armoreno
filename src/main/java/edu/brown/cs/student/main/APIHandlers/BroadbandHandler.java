@@ -14,14 +14,14 @@ import spark.Route;
 
 public class BroadbandHandler implements Route {
 
-  ACSDataSource proxy;
+  ACSProxy proxy;
 
-  public BroadbandHandler(ACSDataSource proxy) {
+  public BroadbandHandler(ACSProxy proxy) {
     this.proxy = proxy;
   }
 
   @Override
-  public Object handle(Request request, Response response) throws DatasourceException, IOException {
+  public Object handle(Request request, Response response) {
 
     Moshi moshi = new Moshi.Builder().build();
 
@@ -31,7 +31,6 @@ public class BroadbandHandler implements Route {
 
     //map to put results and send back to user
     Map<String, String> responseMap = new HashMap<>();
-
 
     String targetState = request.queryParams("state");
     String county = request.queryParams("county");
@@ -68,6 +67,7 @@ public class BroadbandHandler implements Route {
 //    }
 
       //return response in form of json to post to page
+
     return adapter.toJson(responseMap);
   }
 }

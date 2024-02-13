@@ -4,10 +4,8 @@ import Broadband.BroadbandData;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
-import java.util.Collection;
+
 
 public class ACSProxy implements APISource{
 
@@ -21,15 +19,16 @@ public class ACSProxy implements APISource{
     makeCache();
   }
 
-  private void makeCache(){
-      CacheLoader<String[], BroadbandData> loader = new CacheLoader<String[], BroadbandData>() {
-          @Override
-          public BroadbandData load(String[] loc) throws Exception {
+  private void makeCache() {
+      CacheLoader<String[], BroadbandData> loader = new CacheLoader<>() {
+              @Override
+              public BroadbandData load (String[]loc) throws Exception {
               return getBroadbandData(loc);
-          }
-      };
+            }
+          };
 
-      this.cache = CacheBuilder.newBuilder().maximumSize(1000).build(loader);
+      this.cache =CacheBuilder.newBuilder().maximumSize(1000).build(loader);
+
   }
 
   @Override
