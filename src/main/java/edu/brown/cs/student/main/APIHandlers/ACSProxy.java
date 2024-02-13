@@ -4,6 +4,7 @@ import Broadband.BroadbandData;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -11,20 +12,24 @@ import java.util.Collection;
 public class ACSProxy implements APISource{
 
   private final ACSDataSource source;
-  private final LoadingCache<String[], BroadbandData> cache;
+  private LoadingCache<String[], BroadbandData> cache;
 
 
   public ACSProxy() throws DatasourceException, IOException {
     this.source = new ACSDataSource();
 
-    this.cache = CacheBuilder.newBuilder().build(
-        new CacheLoader<>() {
+    makeCache();
+  }
+
+  private void makeCache(){
+      CacheLoader<String[], BroadbandData> loader = new CacheLoader<String[], BroadbandData>() {
           @Override
           public BroadbandData load(String[] loc) throws Exception {
-            return source.getBroadbandData(loc);
+              return getBroadbandData(loc);
           }
-        } //TODO figure out how to catch the exception from the cache
-    );
+      };
+
+      this.cache = CacheBuilder.newBuilder().maximumSize(1000).build(loader);
   }
 
   @Override
@@ -35,5 +40,6 @@ public class ACSProxy implements APISource{
     System.out.println(cache.stats());
     return result;
   }
+
 }
 
