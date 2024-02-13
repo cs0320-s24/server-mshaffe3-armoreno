@@ -16,19 +16,24 @@ public class ACSProxy implements APISource{
   public ACSProxy() throws DatasourceException, IOException {
     this.source = new ACSDataSource();
 
-    makeCache();
+    this.makeCache();
   }
 
-  private void makeCache() {
+  private void makeCache() throws DatasourceException, IOException {
       CacheLoader<String[], BroadbandData> loader = new CacheLoader<>() {
-              @Override
+
+          @Override
               public BroadbandData load (String[]loc) throws Exception {
-              return getBroadbandData(loc);
+              return makeRequest(loc);
             }
           };
 
       this.cache =CacheBuilder.newBuilder().maximumSize(1000).build(loader);
 
+  }
+
+  public BroadbandData makeRequest(String[] loc) throws DatasourceException, IOException {
+      return this.source.getBroadbandData(loc);
   }
 
   @Override
