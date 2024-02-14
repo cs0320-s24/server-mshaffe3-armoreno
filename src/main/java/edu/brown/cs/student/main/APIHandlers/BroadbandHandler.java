@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -21,7 +23,7 @@ public class BroadbandHandler implements Route {
   }
 
   @Override
-  public Object handle(Request request, Response response) {
+  public Object handle(Request request, Response response) throws ExecutionException {
 
     Moshi moshi = new Moshi.Builder().build();
 
