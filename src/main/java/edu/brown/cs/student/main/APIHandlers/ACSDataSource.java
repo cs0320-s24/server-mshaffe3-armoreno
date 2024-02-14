@@ -21,14 +21,19 @@ import okio.Buffer;
 public class ACSDataSource implements APISource{
   private final Map<String, String> stateCodes;
 
-  public ACSDataSource() throws DatasourceException, IOException {
+  public ACSDataSource() throws DatasourceException{
     //instantiate hashMap
     this.stateCodes = new HashMap<>();
     //request from api
 
-    List<List<String>> body = this.getBody(new URL("https","api.census.gov",
-        "/data/2010/dec/sf1?get=NAME&for=state:*"));
-    this.buildMap(body);
+    try{
+      List<List<String>> body = this.getBody(new URL("https","api.census.gov",
+              "/data/2010/dec/sf1?get=NAME&for=state:*"));
+      this.buildMap(body);
+    }catch(IOException e){
+      throw new DatasourceException(e.getMessage(), e);
+    }
+
   }
 
   private void buildMap(List<List<String>> stateData) {
@@ -43,27 +48,31 @@ public class ACSDataSource implements APISource{
    * @param stateName
    * @param countyName
    * @return
-   * @throws IOException
    * @throws DatasourceException
    */
   private String getCounty(String stateName, String countyName)
-      throws IOException, DatasourceException {
+      throws DatasourceException {
 
     String stateCode = stateCodes.get(stateName);
     //queries the API with a given state code
-    List<List<String>> body = this.getBody(new URL(
-            "https",
-            "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=county:*&in=state:"+
-        stateCode));
+    try{
+      List<List<String>> body = this.getBody(new URL(
+              "https",
+              "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=county:*&in=state:"+
+              stateCode));
 
-    //searches for the correct county
-    for(List<String> county:body){
-      if(county.get(0).toLowerCase(Locale.US).contains(countyName)){
-        //returns county code
-        return county.get(2);
+      //searches for the correct county
+      for(List<String> county:body){
+        if(county.get(0).toLowerCase(Locale.US).contains(countyName)){
+          //returns county code
+          return county.get(2);
+        }
       }
+      throw new DatasourceException("No such county in provided state.");
+
+    }catch (IOException e){
+      throw new DatasourceException(e.getMessage(), e);
     }
-    throw new DatasourceException("No such county in provided state.");
   }
 
   /**
@@ -83,7 +92,7 @@ public class ACSDataSource implements APISource{
    * @throws DatasourceException
    */
   @Override
-  public BroadbandData getBroadbandData(String[] loc) throws IOException, DatasourceException {
+  public BroadbandData getBroadbandData(String[] loc) throws DatasourceException {
     return queryACS(loc[0], loc[1]);
   }
 
@@ -93,41 +102,48 @@ public class ACSDataSource implements APISource{
    * @param state
    * @param county
    * @return
-   * @throws IOException
    * @throws DatasourceException
    */
-  private BroadbandData queryACS(String state, String county) throws IOException, DatasourceException {
+  private BroadbandData queryACS(String state, String county) throws DatasourceException {
 
     //convert names into codes
     String stateCode = getState(state.toLowerCase(Locale.US));
     String countyCode = getCounty(state.toLowerCase(Locale.US), county.toLowerCase(Locale.US));
 
     //create moshi adapter to parse response from api
+    try{
+      List<List<String>> body = getBody(new URL(
+              "https",
+              "api.census.gov",
+              "/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:"
+                      + countyCode
+                      + "&in=state:"
+                      + stateCode
+                      +"&key=c62c39cc48683fae5510e74dbad5e1aa8cd6ed5a"));
 
-    List<List<String>> body = getBody(new URL(
-            "https",
-            "api.census.gov",
-            "/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:"
-                    + countyCode
-                    + "&in=state:"
-                    + stateCode
-                    +"&key=c62c39cc48683fae5510e74dbad5e1aa8cd6ed5a"));
+      //returns data needed in the form of a Broadband data
+      return new BroadbandData(new Broadband(body.get(1).get(1)), Calendar.getInstance(), state, county);
 
+    }catch (IOException e){
+      throw new DatasourceException(e.getMessage(), e);
+    }
 
-    //returns data needed in the form of a Broadband data
-    return new BroadbandData(new Broadband(body.get(1).get(1)), Calendar.getInstance(), state, county);
   }
 
-  private static HttpURLConnection connect(URL requestURL) throws IOException, DatasourceException {
+  private static HttpURLConnection connect(URL requestURL) throws DatasourceException {
     // connects with api and requests
-    URLConnection urlConnection = requestURL.openConnection();
-            if(! (urlConnection instanceof HttpURLConnection clientConnection))
-                throw new DatasourceException("unexpected: result of connection wasn't HTTP");
+    try{
+      URLConnection urlConnection = requestURL.openConnection();
+      if(! (urlConnection instanceof HttpURLConnection clientConnection))
+        throw new DatasourceException("unexpected: result of connection wasn't HTTP");
       clientConnection.connect(); // GET
-            if(clientConnection.getResponseCode() != 200)
-                throw new DatasourceException("unexpected: API connection not success status"
-                        +clientConnection.getResponseMessage());
-    return clientConnection;
+      if(clientConnection.getResponseCode() != 200)
+        throw new DatasourceException("unexpected: API connection not success status"
+                +clientConnection.getResponseMessage());
+      return clientConnection;
+    }catch (IOException e){
+      throw new DatasourceException(e.getMessage(), e);
+    }
   }
 
   /**
@@ -137,15 +153,20 @@ public class ACSDataSource implements APISource{
    * @throws IOException
    * @throws DatasourceException
    */
-  private List<List<String>> getBody(URL requestURL) throws IOException, DatasourceException {
+  private List<List<String>> getBody(URL requestURL) throws DatasourceException {
 
-    HttpURLConnection clientConnection = connect(requestURL);
+    try{
+      HttpURLConnection clientConnection = connect(requestURL);
 
-    Moshi moshi = new Moshi.Builder().build();
-    Type listType = Types.newParameterizedType(List.class, List.class);
-    JsonAdapter<List<List<String>>> adapter = moshi.adapter(listType);
-    List<List<String>> body = adapter.fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    clientConnection.disconnect();
-    return body;
+      Moshi moshi = new Moshi.Builder().build();
+      Type listType = Types.newParameterizedType(List.class, List.class);
+      JsonAdapter<List<List<String>>> adapter = moshi.adapter(listType);
+
+      List<List<String>> body = adapter.fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
+      clientConnection.disconnect();
+      return body;
+    }catch(IOException e){
+      throw new DatasourceException(e.getMessage(), e);
+    }
   }
 }
