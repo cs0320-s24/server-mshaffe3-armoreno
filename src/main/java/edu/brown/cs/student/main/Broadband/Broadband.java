@@ -1,6 +1,3 @@
 package Broadband;
 
-
-
-public record Broadband (String percentage){ }
-
+public record Broadband(String percentage) {}
