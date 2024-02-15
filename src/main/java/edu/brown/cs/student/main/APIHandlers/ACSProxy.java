@@ -1,8 +1,7 @@
 package APIHandlers;
 
-import APIHandlers.Exceptions.CacheException;
 import APIHandlers.Exceptions.DatasourceException;
-import Broadband.BroadbandData;
+import APIHandlers.Broadband.BroadbandData;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;

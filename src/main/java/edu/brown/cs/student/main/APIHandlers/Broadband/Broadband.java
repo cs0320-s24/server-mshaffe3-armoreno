@@ -1,3 +1,3 @@
-package Broadband;
+package APIHandlers.Broadband;
 
 public record Broadband(String percentage) {}

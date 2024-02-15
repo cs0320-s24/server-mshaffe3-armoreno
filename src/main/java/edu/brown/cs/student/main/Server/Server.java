@@ -3,17 +3,14 @@ package Server;
 import static spark.Spark.after;
 
 import APIHandlers.*;
-import APIHandlers.Exceptions.CacheException;
-import APIHandlers.Exceptions.DatasourceException;
 import CSVHandlers.CSVDataSource;
 import CSVHandlers.LoadCSV;
 import CSVHandlers.SearchCSV;
 import CSVHandlers.ViewCSV;
-import java.io.IOException;
 import spark.Spark;
 
 public class Server {
-  public static void main(String[] args) throws DatasourceException, IOException, CacheException {
+  public static void main(String[] args) {
     int port = 3535;
     Spark.port(port);
 

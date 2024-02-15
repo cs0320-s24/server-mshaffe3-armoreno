@@ -1,7 +1,7 @@
 package APIHandlers;
 
 import APIHandlers.Exceptions.DatasourceException;
-import Broadband.BroadbandData;
+import APIHandlers.Broadband.BroadbandData;
 import java.util.concurrent.ExecutionException;
 
 public interface APISource {
