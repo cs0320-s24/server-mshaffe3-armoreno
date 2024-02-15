@@ -1,6 +1,5 @@
 package APIHandlers;
 
-import APIHandlers.Exceptions.CacheException;
 import APIHandlers.Exceptions.DatasourceException;
 import Broadband.BroadbandData;
 import com.squareup.moshi.JsonAdapter;
@@ -17,35 +16,50 @@ import spark.Route;
 public class BroadbandHandler implements Route {
 
   ACSProxy proxy;
+  Map<String, Object> responseMap;
+  JsonAdapter<Map<String, Object>> adapter;
 
-  public BroadbandHandler() throws DatasourceException, CacheException {
-    // make proxy here to handle exceptions here and populate responseMap
-    this.proxy = new ACSProxy(CacheType.MAX_SIZE, 1000);
+  public BroadbandHandler(){
+    //moshi adapter to build responses
+    Moshi moshi = new Moshi.Builder().build();
+    Type mapStringString = Types.newParameterizedType(Map.class, String.class, String.class);
+    this.adapter = moshi.adapter(mapStringString);
+
+    // map to put results and send back to user
+    this.responseMap = new HashMap<>();
+    this.instantiateHandling();
+  }
+
+  private void instantiateHandling(){
+    try{
+        this.proxy = new ACSProxy(CacheType.MAX_SIZE, 1000);
+
+      }catch(DatasourceException datasourceException) {
+
+        this.responseMap.put("result", "error_datasource");
+        this.responseMap.put("information", datasourceException.getMessage());
+        if (datasourceException.getCause() != null) {
+          this.responseMap.put("cause", datasourceException.getCause());
+        }
+
+      }
+    this.adapter.toJson(responseMap);
   }
 
   @Override
   public Object handle(Request request, Response response) {
-
-    Moshi moshi = new Moshi.Builder().build();
-
-    // creates adapter to format information into a JSON map
-    Type mapStringString = Types.newParameterizedType(Map.class, String.class, String.class);
-    JsonAdapter<Map<String, String>> adapter = moshi.adapter(mapStringString);
-
-    // map to put results and send back to user
-    Map<String, String> responseMap = new HashMap<>();
-
+    this.responseMap = new HashMap<>();
     String targetState = request.queryParams("state");
     String county = request.queryParams("county");
 
     if (targetState == null || county == null) {
       // Bad request! Send an error response.
-      responseMap.put("result", "missing_parameter");
+      responseMap.put("result", "error_bad_request");
       responseMap.put("query_state", targetState);
       responseMap.put("query_county", county);
-      responseMap.put("type", "error");
+      responseMap.put("type", "missing parameter");
       responseMap.put("error_arg", targetState == null ? "state" : "county");
-      return adapter.toJson(responseMap);
+      return this.adapter.toJson(responseMap);
     }
 
     try {
@@ -63,14 +77,17 @@ public class BroadbandHandler implements Route {
         responseMap.put("county", data.county());
 
       } catch (ExecutionException e) {
-        responseMap.put("result", e.getMessage());
+        //is catching illegalArgument or datasource
+        responseMap.put("result", "error_bad_json");
+        responseMap.put("information", e.getCause().getMessage());
+        return this.adapter.toJson(responseMap);
       }
     } catch (DatasourceException e) {
       responseMap.put("result", e.getMessage());
+      return this.adapter.toJson(responseMap);
     }
 
     // return response in form of json to post to page
-
     return adapter.toJson(responseMap);
   }
 }

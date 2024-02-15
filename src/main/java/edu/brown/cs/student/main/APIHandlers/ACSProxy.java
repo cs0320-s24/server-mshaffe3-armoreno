@@ -18,7 +18,7 @@ public class ACSProxy implements APISource {
 
   private final CacheType type;
 
-  public ACSProxy(CacheType myType, int typeAmount) throws DatasourceException, CacheException {
+  public ACSProxy(CacheType myType, int typeAmount) throws DatasourceException{
     this.source = new ACSDataSource();
     this.type = myType;
     this.makeCache(typeAmount);
@@ -29,7 +29,7 @@ public class ACSProxy implements APISource {
     this.type = null;
   }
 
-  private void makeCache(int typeValue) throws CacheException {
+  private void makeCache(int typeValue){
     CacheLoader<Location, BroadbandData> loader =
         new CacheLoader<>() {
 
@@ -48,7 +48,6 @@ public class ACSProxy implements APISource {
       case MAX_SIZE -> this.cache =
           CacheBuilder.newBuilder().maximumSize(typeValue).recordStats().build(loader);
       case NO_LIMIT -> this.cache = CacheBuilder.newBuilder().recordStats().build(loader);
-      default -> throw new CacheException("Cache type not available");
     }
   }
 
@@ -73,8 +72,7 @@ public class ACSProxy implements APISource {
    * @throws ExecutionException - if getBroadbandData throws an error
    */
   @Override
-  public BroadbandData getBroadbandData(String[] loc)
-      throws ExecutionException, DatasourceException {
+  public BroadbandData getBroadbandData(String[] loc) throws DatasourceException, ExecutionException {
     String[] newLoc = new String[] {loc[0].toLowerCase(Locale.US), loc[1].toLowerCase(Locale.US)};
 
     if (this.type != null) {

@@ -25,21 +25,23 @@ public class ACSDataSource implements APISource {
     // instantiate hashMap
     this.stateCodes = new HashMap<>();
     // request from api
+    this.buildMap();
 
-    try {
-      List<List<String>> body =
-          this.getBody(
-              new URL("https", "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=state:*"));
-      this.buildMap(body);
-    } catch (IOException e) {
-      throw new DatasourceException(e.getMessage(), e);
-    }
   }
 
-  private void buildMap(List<List<String>> stateData) {
-    stateData.remove(0);
-    for (List<String> row : stateData) {
-      this.stateCodes.put(row.get(0).toLowerCase(Locale.US), row.get(1).toLowerCase(Locale.US));
+  private void buildMap() throws DatasourceException {
+    try {
+      List<List<String>> stateData =
+              this.getBody(
+                      new URL("https", "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=state:*"));
+      stateData.remove(0);
+      for (List<String> row : stateData) {
+        this.stateCodes.put(row.get(0).toLowerCase(Locale.US), row.get(1).toLowerCase(Locale.US));
+      }
+    } catch (IOException e) {
+      throw new DatasourceException(e.getMessage(), e);
+    } catch (DatasourceException e) {
+        throw new DatasourceException("Can't process initial API access");
     }
   }
 
@@ -70,7 +72,7 @@ public class ACSDataSource implements APISource {
           return county.get(2);
         }
       }
-      throw new DatasourceException("No such county in provided state.");
+      throw new DatasourceException("No such county in provided state: " + countyName);
 
     } catch (IOException e) {
       throw new DatasourceException(e.getMessage(), e);
@@ -83,8 +85,12 @@ public class ACSDataSource implements APISource {
    * @param state
    * @return
    */
-  private String getState(String state) {
-    return this.stateCodes.get(state.toLowerCase(Locale.US));
+  private String getState(String state) throws DatasourceException {
+    String stateCode = this.stateCodes.get(state.toLowerCase(Locale.US));
+    if(stateCode == null){
+      throw new DatasourceException("State doesn't exist: " + state);
+    }
+    return stateCode;
   }
 
   /**
@@ -114,13 +120,8 @@ public class ACSDataSource implements APISource {
 
     // convert names into codes
     String stateCode = getState(state.toLowerCase(Locale.US));
-    if (stateCode == null) {
-      throw new IllegalArgumentException("state does not exist: " + state);
-    }
+    //System.out.println(stateCode);
     String countyCode = getCounty(state.toLowerCase(Locale.US), county.toLowerCase(Locale.US));
-    if (countyCode == null) {
-      throw new IllegalArgumentException("county does not exist in state" + state + ": " + county);
-    }
 
     // create moshi adapter to parse response from api
     try {
