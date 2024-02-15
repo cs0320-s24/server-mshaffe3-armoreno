@@ -2,10 +2,9 @@ package Server;
 
 import static spark.Spark.after;
 
-import APIHandlers.ACSDataSource;
-import APIHandlers.ACSProxy;
-import APIHandlers.BroadbandHandler;
-import APIHandlers.DatasourceException;
+import APIHandlers.*;
+import APIHandlers.Exceptions.CacheException;
+import APIHandlers.Exceptions.DatasourceException;
 import CSVHandlers.CSVDataSource;
 import CSVHandlers.LoadCSV;
 import CSVHandlers.SearchCSV;
@@ -13,10 +12,8 @@ import CSVHandlers.ViewCSV;
 import java.io.IOException;
 import spark.Spark;
 
-import java.io.IOException;
-
 public class Server {
-  public static void main(String[] args) throws DatasourceException, IOException {
+  public static void main(String[] args) throws DatasourceException, IOException, CacheException {
     int port = 3535;
     Spark.port(port);
 
@@ -27,12 +24,12 @@ public class Server {
           response.header("Access-Control-Allow-Methods", "*");
         });
     CSVDataSource CSVDataSource = new CSVDataSource();
-    ACSProxy proxy = new ACSProxy();
+
     // Setting up the handler for the GET /order and /activity endpoints
     Spark.get("loadcsv", new LoadCSV(CSVDataSource));
     Spark.get("viewcsv", new ViewCSV(CSVDataSource));
     Spark.get("searchcsv", new SearchCSV(CSVDataSource));
-    Spark.get("broadband", new BroadbandHandler(proxy));
+    Spark.get("broadband", new BroadbandHandler());
     Spark.init();
     Spark.awaitInitialization();
 
