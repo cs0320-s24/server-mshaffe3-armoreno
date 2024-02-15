@@ -2,6 +2,7 @@ package CSVHandlers;
 
 import CSVHandlers.SearchFunctionality.Search;
 import CSVHandlers.SearchFunctionality.ValueNotFoundException;
+import CSVHandlers.ViewCSV.NoFileLoadedResponse;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import java.util.HashMap;
@@ -22,6 +23,9 @@ public class SearchCSV implements Route {
   @Override
   public Object handle(Request request, Response response) {
     this.data = CSVDataSource.getData();
+    if (this.data.size() == 0) {
+      return new NoFileLoadedResponse().serialize();
+    }
     String value = request.queryParams("value");
     List<List<String>> results;
     String identifier = request.queryParams("identifier");
@@ -31,7 +35,7 @@ public class SearchCSV implements Route {
     responseMap.put("column_identifier", identifier);
 
     if (value == null) {
-      return new InvalidSearchResponse("no search value provided");
+      return new InvalidSearchResponse("no search value provided").serialize();
     }
 
     // headers boolean true = words, false = index
@@ -81,7 +85,7 @@ public class SearchCSV implements Route {
     }
   }
 
-  private record InvalidSearchResponse(String failureReason) {
+  public record InvalidSearchResponse(String failureReason) {
 
     String serialize() {
       try {
