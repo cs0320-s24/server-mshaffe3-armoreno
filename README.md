@@ -12,7 +12,12 @@ Census API. This was designed with the Mesh Network Coalition stakeholder in min
 For both the CSV datasource (file)and the ACSDatasource (API), we created proxy classes that were
 responsible for storing data across handlers in the case of CSV, and storing the cache & wrapping
 the ACSDatasource in the case of broadband.
-  For CSVHandling, this proxy class re
+  For CSVHandling, this proxy class ensures that no server error is encountered if the View or
+  Search handler is called without a file loaded, and also returns a defensive copy of the data to
+  protect it from mutation.
+  For Broadband ACS data, the ACS Proxy was used to store the cache which holds previously searched
+  queries for more efficient access. That way, the ACSDatasource, which was wrapped by the proxy,
+  was only asked to actually query the API if the result had not been in the cache.
 
 
 # Errors/Bugs
