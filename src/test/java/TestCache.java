@@ -1,59 +1,157 @@
-import Handlers.Broadband.Broadband;
-import Handlers.BroadbandHandler.BroadbandHandler;
+import Handlers.Broadband.BroadbandData;
 import Handlers.BroadbandHandler.DataSource.ACSDataSource;
+import Handlers.BroadbandHandler.DataSource.ACSProxy;
 import Handlers.BroadbandHandler.DataSource.CacheType;
+import Handlers.BroadbandHandler.DataSource.Location;
 import Handlers.Exceptions.DatasourceException;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import spark.Spark;
+import java.util.concurrent.ExecutionException;
 
-import java.lang.reflect.Type;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestCache {
-    @BeforeAll
-    public static void setup_before_everything() {
-        // Set the Spark port number.
-        Spark.port(0);
-
-        // Remove the logging spam during tests
-        Logger.getLogger("").setLevel(Level.WARNING); // empty name = root logger
-    }
-
-    @AfterEach
-    public void teardown() {
-        // Gracefully stop Spark listening on both endpoints after each test
-        Spark.unmap("broadband");
-        Spark.awaitStop(); // don't proceed until the server is stopped
-    }
-
-    private final Type mapStringObject = Types.newParameterizedType(Map.class, String.class, Object.class);
-    private JsonAdapter<Map<String, String>> responseAdapter;
-    private JsonAdapter<Broadband> broadbandAdapter;
-
-    private String[] loc;
 
     @Test
-    public void noCacheSuccess() throws DatasourceException {
-        // In fact, restart the entire Spark server for every test!
-        Spark.get("broadband", new BroadbandHandler(new ACSDataSource(), CacheType.MAX_SIZE, 1000));
-        Spark.init();
-        Spark.awaitInitialization(); // don't continue until the server is listening
+    public void noCacheSuccess() throws DatasourceException, ExecutionException {
 
-        Moshi moshi = new Moshi.Builder().build();
-        responseAdapter = moshi.adapter(mapStringObject);
-        broadbandAdapter = moshi.adapter(Broadband.class);
+        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.NONE, 0);
 
-        loc = new String[]{"Hardin+County", "Kentucky"};
+        assertNull(acsProxy.getStats());
 
+        BroadbandData testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+
+        assertEquals("success", testData.result());
+        assertEquals("87.2", testData.percentage().percentage());
+        assertEquals("hardin county", testData.county());
+        assertEquals("kentucky", testData.state());
 
     }
 
+    @Test
+    public void cacheMaxSizeSuccess() throws DatasourceException, ExecutionException {
+
+        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.MAX_SIZE, 1);
+
+        //make a call
+        BroadbandData testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+
+        assertEquals("success", testData.result());
+        assertEquals("87.2", testData.percentage().percentage());
+        assertEquals("hardin county", testData.county());
+        assertEquals("kentucky", testData.state());
+
+        //item exists in cache
+        assertNotNull(acsProxy.getMap().get(new Location(new String[]{"kentucky", "hardin county"})));
+
+        //call the same thing again
+        testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+
+        assertEquals("success", testData.result());
+        assertEquals("87.2", testData.percentage().percentage());
+        assertEquals("hardin county", testData.county());
+        assertEquals("kentucky", testData.state());
+
+        //cache's hitCount should have gone up by one
+        com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
+        assertEquals(cacheStats.hitCount(), 1);
+        assertEquals(cacheStats.loadCount(), 1);
+        assertEquals(cacheStats.missCount(), 1);
+
+        //make a different call
+        testData = acsProxy.getBroadbandData(new String[]{"california", "kings county"});
+
+        assertEquals("success", testData.result());
+        assertEquals("83.5", testData.percentage().percentage());
+        assertEquals("kings county", testData.county());
+        assertEquals("california", testData.state());
+
+
+        //previous item no longer exists in cache
+        assertNull(acsProxy.getMap().get(new Location(new String[]{"kentucky", "hardin county"})));
+        //new item exists in cache now
+        assertNotNull(acsProxy.getMap().get(new Location(new String[]{"california", "kings county"})));
+    }
+
+    @Test
+    public void cacheNoLimitTest() throws DatasourceException, ExecutionException {
+
+        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.MAX_SIZE, 1);
+
+        //make sure cache is not null and empty before any call
+        com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
+        assertEquals(cacheStats.hitCount(), 0);
+        assertEquals(cacheStats.loadCount(), 0);
+        assertEquals(cacheStats.missCount(), 0);
+
+        //make a call
+        BroadbandData testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+
+        assertEquals("success", testData.result());
+        assertEquals("87.2", testData.percentage().percentage());
+        assertEquals("hardin county", testData.county());
+        assertEquals("kentucky", testData.state());
+
+        //cache should have loaded a search
+        cacheStats = acsProxy.getStats();
+        assertEquals(cacheStats.hitCount(), 0);
+        assertEquals(cacheStats.loadCount(), 1);
+        assertEquals(cacheStats.missCount(), 1);
+
+        //call the same thing again
+        testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+
+        assertEquals("success", testData.result());
+        assertEquals("87.2", testData.percentage().percentage());
+        assertEquals("hardin county", testData.county());
+        assertEquals("kentucky", testData.state());
+
+        //cache's hitCount should have gone up by one
+        cacheStats = acsProxy.getStats();
+        assertEquals(cacheStats.hitCount(), 1);
+        assertEquals(cacheStats.loadCount(), 1);
+        assertEquals(cacheStats.missCount(), 1);
+
+    }
+
+    @Test
+    public void cacheTimeLimitTest() throws DatasourceException, ExecutionException {
+
+        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.TIME, 1);
+
+        //make sure cache is not null and empty before any call
+        com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
+        assertEquals(cacheStats.hitCount(), 0);
+        assertEquals(cacheStats.loadCount(), 0);
+        assertEquals(cacheStats.missCount(), 0);
+
+        //make a call
+        BroadbandData testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+
+        assertEquals("success", testData.result());
+        assertEquals("87.2", testData.percentage().percentage());
+        assertEquals("hardin county", testData.county());
+        assertEquals("kentucky", testData.state());
+
+        //cache should have loaded a search
+        cacheStats = acsProxy.getStats();
+        assertEquals(cacheStats.hitCount(), 0);
+        assertEquals(cacheStats.loadCount(), 1);
+        assertEquals(cacheStats.missCount(), 1);
+
+        //call the same thing again
+        testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+
+        assertEquals("success", testData.result());
+        assertEquals("87.2", testData.percentage().percentage());
+        assertEquals("hardin county", testData.county());
+        assertEquals("kentucky", testData.state());
+
+        //cache's hitCount should have gone up by one
+        cacheStats = acsProxy.getStats();
+        assertEquals(cacheStats.hitCount(), 1);
+        assertEquals(cacheStats.loadCount(), 1);
+        assertEquals(cacheStats.missCount(), 1);
+
+    }
 
 }

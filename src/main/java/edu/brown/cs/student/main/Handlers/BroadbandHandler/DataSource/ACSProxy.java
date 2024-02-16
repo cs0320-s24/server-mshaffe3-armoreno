@@ -7,6 +7,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -90,15 +91,33 @@ public class ACSProxy implements APISource {
   public BroadbandData getBroadbandData(String[] loc) throws DatasourceException, ExecutionException {
     String[] newLoc = new String[] {loc[0].toLowerCase(Locale.US), loc[1].toLowerCase(Locale.US)};
 
-    if (this.type != null) {
+    if (this.type != CacheType.NONE) {
       Location location = new Location(newLoc);
       // "get" works and recognizes possible exceptions
       BroadbandData result = cache.get(location);
-      // For debugging and demo (would remove in a "real" version):
-      //System.out.println(cache.stats());
       return result;
     }
     //if not in cache already
     return makeRequest(newLoc);
+  }
+
+  /**
+   * function that returns the caches status for testing purposes
+   *
+   * @return null if no cache is used and a caches stats if it is
+   */
+  public com.google.common.cache.CacheStats getStats(){
+    if(this.cache == null){
+      return null;
+    }
+      return cache.stats();
+
+  }
+
+  public ConcurrentMap<Location, BroadbandData> getMap(){
+    if(this.cache == null){
+      return null;
+    }
+    return cache.asMap();
   }
 }
