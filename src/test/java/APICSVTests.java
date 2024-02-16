@@ -39,7 +39,7 @@ public class APICSVTests {
   @BeforeAll
   public static void setup_before_everything() {
     // Set the Spark port number.
-    Spark.port(0);
+    Spark.port(3636);
 
     // Remove the logging spam during tests
     Logger.getLogger("").setLevel(Level.WARNING); // empty name = root logger
@@ -126,7 +126,7 @@ public class APICSVTests {
 
     //next, call broadband
     HttpURLConnection bbConnection = tryRequest(
-        "broadband?state=Kentucky&county=HardinCounty");
+        "broadband?state=Kentucky&county=Hardin+County");
     assertEquals(200, bbConnection.getResponseCode());
     Map<String, String> responseBody =
         responseAdapter.fromJson(new Buffer().readFrom(bbConnection.getInputStream()));
@@ -148,7 +148,5 @@ public class APICSVTests {
     assertEquals(
         List.of(List.of("Foster", "'99,892.00'", "'118,000.00'", "'37,382.00'")),
         result.responseMap().get("data"));
-
   }
-
 }
