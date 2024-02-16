@@ -1,3 +1,4 @@
+
 import Handlers.Broadband.BroadbandData;
 import Handlers.BroadbandHandler.DataSource.ACSDataSource;
 import Handlers.BroadbandHandler.DataSource.ACSProxy;
@@ -16,8 +17,10 @@ public class TestCache {
 
         ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.NONE, 0);
 
+        //make sure cache is null
         assertNull(acsProxy.getStats());
 
+        //can still make requests to API
         BroadbandData testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
 
         assertEquals("success", testData.result());

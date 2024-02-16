@@ -1,5 +1,4 @@
 package Handlers.BroadbandHandler.DataSource;
-
 import Handlers.Exceptions.DatasourceException;
 import Handlers.Broadband.BroadbandData;
 import java.util.concurrent.ExecutionException;
@@ -9,6 +8,5 @@ import java.util.concurrent.ExecutionException;
  * ACSDataSource
  */
 public interface APISource {
-  BroadbandData getBroadbandData(String[] loc)
-      throws DatasourceException, ExecutionException;
+  BroadbandData getBroadbandData(String[] loc) throws DatasourceException, ExecutionException;
 }

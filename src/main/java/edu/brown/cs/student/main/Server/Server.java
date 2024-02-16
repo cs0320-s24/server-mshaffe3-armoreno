@@ -17,11 +17,10 @@ public class Server {
     int port = 3535;
     Spark.port(port);
 
-    // NOTE: we need to change the value from * to 'origins we trust'
     after(
         (request, response) -> {
-          response.header("Access-Control-Allow-Origin", "*");
-          response.header("Access-Control-Allow-Methods", "*");
+          response.header("Access-Control-Allow-Origin", "http");
+          response.header("Access-Control-Allow-Methods", "http");
         });
     CSVDataSource CSVDataSource = new CSVDataSource();
 

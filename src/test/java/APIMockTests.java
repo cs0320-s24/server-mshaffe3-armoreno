@@ -1,3 +1,4 @@
+
 import Handlers.Broadband.Broadband;
 import Handlers.Broadband.BroadbandData;
 import Handlers.BroadbandHandler.BroadbandHandler;
@@ -6,13 +7,6 @@ import Handlers.BroadbandHandler.DataSource.MockAPISource;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
-import okio.Buffer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import spark.Spark;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
@@ -21,6 +15,12 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import okio.Buffer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import spark.Spark;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -43,6 +43,7 @@ public class APIMockTests {
     @BeforeEach
     public void setup() {
         // In fact, restart the entire Spark server for every test!
+
         Spark.get("broadband", new BroadbandHandler(new MockAPISource(new BroadbandData("success",new Broadband("30"),
                 Calendar.getInstance().getTime().toString(),
                 "Kentucky", "Hardin County")), CacheType.MAX_SIZE, 1000));

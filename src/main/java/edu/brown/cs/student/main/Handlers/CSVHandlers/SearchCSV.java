@@ -1,5 +1,6 @@
 package Handlers.CSVHandlers;
 
+
 import Handlers.CSVHandlers.SearchFunctionality.Search;
 import Handlers.Exceptions.ValueNotFoundException;
 import Handlers.CSVHandlers.ViewCSV.NoFileLoadedResponse;
@@ -13,14 +14,13 @@ import spark.Response;
 import spark.Route;
 
 /**
- * This class implements the search functionality from CSV Sprint but uses it to handle API
- * requests
+ * This class implements the search functionality from CSV Sprint but uses it to handle API requests
  */
 public class SearchCSV implements Route {
 
-  //the data field is the parsedCSV
+  // the data field is the parsedCSV
   List<List<String>> data;
-  //the CSVDataSource is used to obtain the data
+  // the CSVDataSource is used to obtain the data
   CSVDataSource CSVDataSource;
 
   public SearchCSV(CSVDataSource CSVDataSource) {
@@ -38,34 +38,34 @@ public class SearchCSV implements Route {
   @Override
   public Object handle(Request request, Response response) {
     this.data = CSVDataSource.getData();
-    //If there is no data to be obtained, then no "loadcsv" call made yet
+    // If there is no data to be obtained, then no "loadcsv" call made yet
     if (this.data.size() == 0) {
       return new NoFileLoadedResponse().serialize();
     }
-    //store queried values
+    // store queried values
     String value = request.queryParams("value");
     List<List<String>> results;
     String identifier = request.queryParams("identifier");
 
-    //create responseMap
+    // create responseMap
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put("value_query", value);
     responseMap.put("column_identifier", identifier);
 
-    //Checks to see if no value was provided-- cannot search for null!
+    // Checks to see if no value was provided-- cannot search for null!
     if (value == null) {
       return new InvalidSearchResponse("no search value provided").serialize();
     }
 
     // headers boolean determines type of column identifier: true = name of header, false = index
-    //of column
+    // of column
     if (identifier == null) {
       // Search without column identifier
       results = new Search(this.data, value).getResults();
     } else {
       boolean headerSearch;
       try {
-        //See if identifier is an index or header
+        // See if identifier is an index or header
         Integer.parseInt(identifier);
         headerSearch = false;
       } catch (NumberFormatException e) {
@@ -75,15 +75,15 @@ public class SearchCSV implements Route {
         results = new Search(this.data, value, headerSearch, identifier).getResults();
 
       } catch (ValueNotFoundException e) {
-        //Return response for valueNotFoundException thrown
+        // Return response for valueNotFoundException thrown
         return new InvalidSearchResponse(e.getMessage()).serialize();
       }
     }
-    //if no results turned up
+    // if no results turned up
     if (results.size() == 0) {
       responseMap.put("search_result", "failure");
     } else {
-      //add successful results to field in response map
+      // add successful results to field in response map
       responseMap.put("search_result", "success");
       responseMap.put("data", results);
     }
@@ -92,6 +92,7 @@ public class SearchCSV implements Route {
 
   /**
    * Response returned if search method ran properly, regardless of number of matches
+   *
    * @param responseMap
    */
   public record SearchResultResponse(Map<String, Object> responseMap) {
@@ -103,8 +104,8 @@ public class SearchCSV implements Route {
   }
 
   /**
-   * Response returned if error occurred in the formation of the request of other strange
-   * issues
+   * Response returned if error occurred in the formation of the request of other strange issues
+   *
    * @param failureReason
    */
   public record InvalidSearchResponse(String failureReason) {
