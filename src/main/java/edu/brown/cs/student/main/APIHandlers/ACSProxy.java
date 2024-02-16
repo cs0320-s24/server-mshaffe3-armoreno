@@ -10,24 +10,45 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The Proxy class serves as a wrapper class for the datasource, a mediator between the handler and
+ * API calls, and a place for caching to occur.
+ */
 public class ACSProxy implements APISource {
-
+  //Datasource to be wrapped
   private final ACSDataSource source;
+  //cache to store results
   private LoadingCache<Location, BroadbandData> cache;
-
+  //determines what eviction policy cache should have
   private final CacheType type;
 
+  /**
+   * This constructor takes in a CacheType and numerical value to go with it, and makes a
+   * new cache and DataSource.
+   * @param myType
+   * @param typeAmount
+   * @throws DatasourceException
+   */
   public ACSProxy(CacheType myType, int typeAmount) throws DatasourceException{
     this.source = new ACSDataSource();
     this.type = myType;
     this.makeCache(typeAmount);
   }
 
+  /**
+   * This copy constructor takes in no caching parameters and can be used if the developer
+   * wishes for no results to be cached.
+   * @throws DatasourceException
+   */
   public ACSProxy() throws DatasourceException {
     this.source = new ACSDataSource();
     this.type = null;
   }
 
+  /**
+   * This helper method creates a cache based on the parameters passed into Proxy.
+   * @param typeValue
+   */
   private void makeCache(int typeValue){
     CacheLoader<Location, BroadbandData> loader =
         new CacheLoader<>() {
@@ -39,13 +60,16 @@ public class ACSProxy implements APISource {
         };
 
     switch (this.type) {
+      //delete results after access
       case TIME -> this.cache =
           CacheBuilder.newBuilder()
               .expireAfterAccess(typeValue, TimeUnit.MINUTES)
               .recordStats()
               .build(loader);
+      //delete results after max size
       case MAX_SIZE -> this.cache =
           CacheBuilder.newBuilder().maximumSize(typeValue).recordStats().build(loader);
+      //never delete results
       case NO_LIMIT -> this.cache = CacheBuilder.newBuilder().recordStats().build(loader);
     }
   }
@@ -82,7 +106,7 @@ public class ACSProxy implements APISource {
       System.out.println(cache.stats());
       return result;
     }
-
+    //if not in cache already
     return makeRequest(newLoc);
   }
 }

@@ -2,7 +2,7 @@ package CSVHandlers;
 
 import CSVHandlers.SearchFunctionality.Creators.CreatorFromRow;
 import CSVHandlers.SearchFunctionality.Creators.StringCreator;
-import CSVHandlers.SearchFunctionality.FactoryFailureException;
+import APIHandlers.Exceptions.FactoryFailureException;
 import CSVHandlers.SearchFunctionality.Parser;
 import com.squareup.moshi.Moshi;
 import java.io.BufferedReader;
@@ -25,15 +25,14 @@ public class LoadCSV implements Route {
 
     String filepath = request.queryParams("filepath");
     if (filepath == null) {
-      return new FileLoadFailureResponse("no filepath provided");
+      return new FileLoadFailureResponse(null,"no filepath provided");
     }
 
     try {
       List<List<String>> parsedData = this.parseData(filepath);
       this.CSVDataSource.setData(parsedData);
-    } catch (IOException | FactoryFailureException e) {
-      System.out.println(e.getMessage());
-      return new FileLoadFailureResponse(filepath).serialize();
+    } catch (IOException | FactoryFailureException | IllegalAccessException e) {
+      return new FileLoadFailureResponse(filepath, e.getMessage()).serialize();
     }
 
     return new FileLoadSuccessResponse(filepath).serialize();
@@ -48,9 +47,11 @@ public class LoadCSV implements Route {
    * @throws FactoryFailureException - When there is a malformed row
    */
   private List<List<String>> parseData(String csvFileName)
-      throws IOException, FactoryFailureException {
+      throws IOException, FactoryFailureException, IllegalAccessException {
+    if(!csvFileName.contains("/data")){
+      throw new IllegalAccessException("File outside restricted directory");
+    }
     // creates a buffered reader out of the fileName created
-    // TODO: build in safeguards against outside file access
     BufferedReader csv = new BufferedReader(new FileReader(csvFileName));
 
     // creates an object creator to pass to parse
@@ -69,12 +70,7 @@ public class LoadCSV implements Route {
    */
   public record FileLoadSuccessResponse(String response_type, String filepath) {
     public FileLoadSuccessResponse(String filepath) {
-      this("loadSuccess", filepath);
-    }
-
-    /**
-     * @return this response, serialized as Json
-     */
+      this("loadSuccess", filepath);}
     String serialize() {
       Moshi moshi = new Moshi.Builder().build();
       return moshi.adapter(FileLoadSuccessResponse.class).toJson(this);
@@ -86,20 +82,13 @@ public class LoadCSV implements Route {
    *
    * @param response_type
    */
-  public record FileLoadFailureResponse(String response_type, String filepath) {
-    public FileLoadFailureResponse(String filepath) {
-      this("loadFailure", filepath);
+  public record FileLoadFailureResponse(String response_type, String filepath, String error_message) {
+    public FileLoadFailureResponse(String filepath, String error_message) {
+      this("loadFailure", filepath, error_message);
     }
-    /**
-     * @return this response, serialized as Json
-     */
     String serialize() {
       Moshi moshi = new Moshi.Builder().build();
       return moshi.adapter(FileLoadFailureResponse.class).toJson(this);
     }
   }
-
-  //  public record NoFilepathProvidedResponse(){
-  //
-  //  }
 }

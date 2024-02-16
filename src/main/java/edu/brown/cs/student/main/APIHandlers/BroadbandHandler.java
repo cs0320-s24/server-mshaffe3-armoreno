@@ -13,12 +13,18 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+/**
+ * This Class Handles API requests and returns broadband data for the queried state and county
+ */
 public class BroadbandHandler implements Route {
-
+  //The ACS Proxy acts as an intermediary for the datasource and is responsible for caching
   ACSProxy proxy;
   Map<String, Object> responseMap;
   JsonAdapter<Map<String, Object>> adapter;
 
+  /**
+   * Constructor sets up the response map and calls instantiateshandling()
+   */
   public BroadbandHandler(){
     //moshi adapter to build responses
     Moshi moshi = new Moshi.Builder().build();
@@ -30,10 +36,15 @@ public class BroadbandHandler implements Route {
     this.instantiateHandling();
   }
 
+  /**
+   * This helper method creates a new Proxy with caching parameters
+   * If there is a datasource issue, an informative error response is sent back
+   */
   private void instantiateHandling(){
     try{
+      //new Proxy is created with cache parameters.
         this.proxy = new ACSProxy(CacheType.MAX_SIZE, 1000);
-
+      //thrown from creation of ACSDatasource
       }catch(DatasourceException datasourceException) {
 
         this.responseMap.put("result", "error_datasource");
@@ -43,9 +54,17 @@ public class BroadbandHandler implements Route {
         }
 
       }
+    //serializes the responseMap to a JSON
     this.adapter.toJson(responseMap);
   }
 
+  /**
+   * The handle method returns a response to the server with broadband data, access time and date,
+   * state and county queries; or, it returns an informative error response
+   * @param request
+   * @param response
+   * @return
+   */
   @Override
   public Object handle(Request request, Response response) {
     this.responseMap = new HashMap<>();

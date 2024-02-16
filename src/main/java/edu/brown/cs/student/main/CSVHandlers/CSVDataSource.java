@@ -9,7 +9,6 @@ import java.util.List;
  */
 public class CSVDataSource {
   List<List<String>> data;
-
   public CSVDataSource() {}
 
   // data state kept here
@@ -18,9 +17,11 @@ public class CSVDataSource {
   }
 
   public List<List<String>> getData() {
+    //if set data has not been called yet (i.e. no valid "loadcsv" calls yet)
     if (data == null) {
       return new ArrayList<>();
     }
+    //returns a defensive copy, rather than the actual reference
     return new ArrayList<>(data);
   }
 }

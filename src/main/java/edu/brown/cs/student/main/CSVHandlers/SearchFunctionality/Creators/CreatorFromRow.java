@@ -1,6 +1,6 @@
 package CSVHandlers.SearchFunctionality.Creators;
 
-import CSVHandlers.SearchFunctionality.FactoryFailureException;
+import APIHandlers.Exceptions.FactoryFailureException;
 import java.util.List;
 
 /**

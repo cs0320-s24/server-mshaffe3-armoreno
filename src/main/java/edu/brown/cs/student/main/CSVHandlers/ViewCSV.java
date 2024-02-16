@@ -7,7 +7,11 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+/**
+ * This class handles the API call for "viewcsv" by displaying the loaded csv file
+ */
 public class ViewCSV implements Route {
+  //Uses the CSVDataSource for ensuring csv has been loaded.
   List<List<String>> data;
   CSVDataSource CSVDataSource;
 
@@ -15,6 +19,13 @@ public class ViewCSV implements Route {
     this.CSVDataSource = CSVDataSource;
   }
 
+  /**
+   * The handle() method checks for "loadcsv" and either returns a NoFileLoadedResponse() or a View
+   * LoadedResponse() which serializes the data from the proxy class.
+   * @param request
+   * @param response
+   * @return
+   */
   @Override
   public Object handle(Request request, Response response) {
     this.data = CSVDataSource.getData();

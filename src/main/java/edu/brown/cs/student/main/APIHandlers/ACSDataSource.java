@@ -18,26 +18,39 @@ import java.util.List;
 import java.util.Map;
 import okio.Buffer;
 
+/**
+ * This class represents a datasource for the ACS API. It makes queries to the ACS API for
+ * broadband data.
+ */
 public class ACSDataSource implements APISource {
   private final Map<String, String> stateCodes;
 
   public ACSDataSource() throws DatasourceException {
-    // instantiate hashMap
+    // instantiate hashMap to store state code API query
     this.stateCodes = new HashMap<>();
-    // request from api
+    // request from api initial values
     this.buildMap();
-
   }
 
+  /**
+   * This helper method queries the API at the onset of the program to retrieve the list of
+   * state codes for future queries.
+   * @throws DatasourceException
+   */
   private void buildMap() throws DatasourceException {
     try {
+      //deserialized data from request
       List<List<String>> stateData =
               this.getBody(
-                      new URL("https", "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=state:*"));
+                      new URL("https", "api.census.gov",
+                          "/data/2010/dec/sf1?get=NAME&for=state:*"));
+      //remove the row of headers
       stateData.remove(0);
+      //loop through and populate the map
       for (List<String> row : stateData) {
         this.stateCodes.put(row.get(0).toLowerCase(Locale.US), row.get(1).toLowerCase(Locale.US));
       }
+      //throw more specific errors for the caller
     } catch (IOException e) {
       throw new DatasourceException(e.getMessage(), e);
     } catch (DatasourceException e) {
@@ -145,6 +158,12 @@ public class ACSDataSource implements APISource {
     }
   }
 
+  /**
+   * This static method tries to connect to the API at the given URL
+   * @param requestURL
+   * @return
+   * @throws DatasourceException
+   */
   private static HttpURLConnection connect(URL requestURL) throws DatasourceException {
     // connects with api and requests
     try {
