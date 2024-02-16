@@ -67,7 +67,7 @@ public class TestCSVHandler {
    * @throws IOException
    */
   private void loadFile(String filename) throws IOException {
-    HttpURLConnection clientConnection = tryRequest("loadcsv?filepath=data/" + filename);
+    HttpURLConnection clientConnection = tryRequest("loadcsv?filepath=" + filename);
 
     // Get an OK response (the *connection* worked, the *API* provides an error response)
     Moshi moshi = new Moshi.Builder().build();
@@ -95,11 +95,11 @@ public class TestCSVHandler {
 
   @Test
   public void testLoadSuccess() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("loadcsv?filepath=data/stardata.csv");
+    HttpURLConnection clientConnection = tryRequest("loadcsv?filepath=data/stars/stardata.csv");
     Moshi moshi = new Moshi.Builder().build();
-    LoadCSV.FileLoadFailureResponse response =
+    FileLoadSuccessResponse response =
         moshi
-            .adapter(LoadCSV.FileLoadFailureResponse.class)
+            .adapter(FileLoadSuccessResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
     clientConnection.disconnect();
     // Checks that response type is a success
@@ -110,7 +110,7 @@ public class TestCSVHandler {
 
   @Test
   public void testViewCSVLoaded() throws IOException {
-    this.loadFile("stardata.csv");
+    this.loadFile("data/stars/stardata.csv");
     HttpURLConnection clientConnection2 = tryRequest("viewcsv");
     Moshi moshi = new Moshi.Builder().build();
     ViewLoadedResponse response2 =
@@ -149,7 +149,7 @@ public class TestCSVHandler {
 
   @Test
   public void testNoValueProvided() throws IOException {
-    this.loadFile("stardata.csv");
+    this.loadFile("data/stars/stardata.csv");
     HttpURLConnection clientConnection = tryRequest("searchcsv");
     assertEquals(200, clientConnection.getResponseCode());
     Moshi moshi = new Moshi.Builder().build();
@@ -163,7 +163,7 @@ public class TestCSVHandler {
 
   @Test
   public void testValueNotFound() throws IOException {
-    this.loadFile("RI_Census.csv");
+    this.loadFile("data/census/RI_Census.csv");
     HttpURLConnection clientConnection = tryRequest("searchcsv?value=Oklahoma");
     assertEquals(200, clientConnection.getResponseCode());
     Moshi moshi = new Moshi.Builder().build();
@@ -178,7 +178,7 @@ public class TestCSVHandler {
 
   @Test
   public void testSearchNoIdentifier() throws IOException {
-    this.loadFile("RI_Census.csv");
+    this.loadFile("data/census/RI_Census.csv");
     HttpURLConnection clientConnection = tryRequest("searchcsv?value=Cranston");
     assertEquals(200, clientConnection.getResponseCode());
     Moshi moshi = new Moshi.Builder().build();
@@ -195,7 +195,7 @@ public class TestCSVHandler {
 
   @Test
   public void testSearchWithHeader() throws IOException {
-    this.loadFile("RI_Census.csv");
+    this.loadFile("data/census/RI_Census.csv");
     HttpURLConnection clientConnection =
         tryRequest("searchcsv?value=Foster&identifier" + "=City/Town");
     assertEquals(200, clientConnection.getResponseCode());
@@ -213,7 +213,7 @@ public class TestCSVHandler {
 
   @Test
   public void testSearchWithIndex() throws IOException {
-    this.loadFile("RI_Census.csv");
+    this.loadFile("data/census/RI_Census.csv");
     HttpURLConnection clientConnection = tryRequest("searchcsv?value=Cranston&identifier=0");
     assertEquals(200, clientConnection.getResponseCode());
     Moshi moshi = new Moshi.Builder().build();

@@ -26,8 +26,6 @@ import spark.Spark;
 public class APIMockTests {
   @BeforeAll
   public static void setup_before_everything() {
-    // Set the Spark port number.
-    Spark.port(0);
 
     // Remove the logging spam during tests
     Logger.getLogger("").setLevel(Level.WARNING); // empty name = root logger
@@ -119,7 +117,6 @@ public class APIMockTests {
 
     Map<String, String> responseBody =
         responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
-
     assertEquals("error_bad_request", responseBody.get("result"));
 
     connection.disconnect();
@@ -137,5 +134,16 @@ public class APIMockTests {
     assertEquals("error_bad_request", responseBody.get("result"));
 
     connection.disconnect();
+  }
+
+  /**
+   * Helper to make working with a large test suite easier: if an error, print more info.
+   *
+   * @param body
+   */
+  private void showDetailsIfError(Map<String, String> body) {
+    if (body.containsKey("type") && "error".equals(body.get("result"))) {
+      System.out.println(body);
+    }
   }
 }

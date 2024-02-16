@@ -14,7 +14,7 @@ import spark.Spark;
 
 public class Server {
   public static void main(String[] args) throws DatasourceException {
-    int port = 3535;
+    int port = 3636;
     Spark.port(port);
 
     after(

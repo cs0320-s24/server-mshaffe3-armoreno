@@ -48,7 +48,7 @@ public class LoadCSV implements Route {
    */
   private List<List<String>> parseData(String csvFileName)
       throws IOException, FactoryFailureException, IllegalAccessException {
-    if (!csvFileName.contains("/data")) {
+    if (!csvFileName.contains("data/")) {
       throw new IllegalAccessException("File outside restricted directory");
     }
     // creates a buffered reader out of the fileName created
