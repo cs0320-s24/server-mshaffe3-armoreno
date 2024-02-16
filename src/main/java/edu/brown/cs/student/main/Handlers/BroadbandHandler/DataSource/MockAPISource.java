@@ -3,7 +3,7 @@ package Handlers.BroadbandHandler.DataSource;
 import Handlers.Broadband.BroadbandData;
 
 /**
- *
+ * This class is used for testing the Broadband Handler without querying the actual ACS API
  */
 public class MockAPISource implements APISource {
 
