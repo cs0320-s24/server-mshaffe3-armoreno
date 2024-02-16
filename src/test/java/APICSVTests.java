@@ -14,6 +14,7 @@ import Handlers.CSVHandlers.LoadCSV.FileLoadSuccessResponse;
 import Handlers.CSVHandlers.SearchCSV;
 import Handlers.CSVHandlers.SearchCSV.SearchResultResponse;
 import Handlers.CSVHandlers.ViewCSV;
+import Handlers.CSVHandlers.ViewCSV.ViewLoadedResponse;
 import Handlers.Exceptions.DatasourceException;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -35,6 +36,9 @@ import org.junit.jupiter.api.Test;
 import spark.Spark;
 
 public class APICSVTests {
+
+  public APICSVTests() throws IOException {
+  }
 
   @BeforeAll
   public static void setup_before_everything() {
@@ -91,26 +95,10 @@ public class APICSVTests {
     return clientConnection;
   }
 
-
   /**
-   * Helper method that calls the loadcsv handler for view and search tests
-   *
-   * @param filename
+   * Tests all API handlers to show full server capabilities
    * @throws IOException
    */
-  private void loadFile(String filename) throws IOException {
-    HttpURLConnection clientConnection = tryRequest("loadcsv?filepath=data/" + filename);
-
-    // Get an OK response (the *connection* worked, the *API* provides an error response)
-    Moshi moshi = new Moshi.Builder().build();
-    // We'll use okio's Buffer class here
-    moshi
-        .adapter(FileLoadSuccessResponse.class)
-        .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    clientConnection.disconnect();
-  }
-
-
   @Test
   public void integrationTest() throws IOException {
     //First, call loadcsv
@@ -134,13 +122,13 @@ public class APICSVTests {
     assertEquals("87.2", responseBody.get("percentage"));
     assertEquals("hardin county", responseBody.get("county"));
     assertEquals("kentucky", responseBody.get("state"));
-   bbConnection.disconnect();
+    bbConnection.disconnect();
 
-   //now call searchcsv
+    //now call searchcsv
     HttpURLConnection searchConnection = tryRequest(
         "searchcsv?value=Foster&identifier=City/Town");
     assertEquals(200, searchConnection.getResponseCode());
-    SearchResultResponse result =moshi
+    SearchResultResponse result = moshi
         .adapter(SearchResultResponse.class)
         .fromJson(new Buffer().readFrom(searchConnection.getInputStream()));
     searchConnection.disconnect();
@@ -148,5 +136,16 @@ public class APICSVTests {
     assertEquals(
         List.of(List.of("Foster", "'99,892.00'", "'118,000.00'", "'37,382.00'")),
         result.responseMap().get("data"));
-  }
+
+    //finally, viewcsv
+    HttpURLConnection viewConnection = tryRequest(
+        "viewcsv");
+    assertEquals(200, viewConnection.getResponseCode());
+    ViewLoadedResponse viewLoadedResponse = moshi
+        .adapter(ViewLoadedResponse.class)
+        .fromJson(new Buffer().readFrom(viewConnection.getInputStream()));
+    viewConnection.disconnect();
+    assertEquals("fileViewSuccess", viewLoadedResponse.response_type());
+}
+
 }

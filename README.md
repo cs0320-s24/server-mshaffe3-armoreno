@@ -33,6 +33,7 @@ The exceptions are primarily caught by the Handler classes themselves, as they a
 
 # Errors/Bugs
 
+
 # Tests
 We tested thoroughly, both unit and integration testing. For CSV Handling, the search and parse
 functionalities were mostly tested from the last sprint, so the test suite focuses on the
@@ -44,3 +45,19 @@ standard success responses.
 For API Unit tests,
 
 # How to
+**Queries:**
+FOR CSV QUERIES:
+/loadcsv?filepath=FILEPATH_HERE
+/viewcsv
+/searchcsv?value=VALUE_HERE&identifier=YOUR_IDENTIFIER_HERE
+* NOTE: searchcsv identifiers can either be Header names of a specific column, or the numerical index of
+that column
+
+FOR ACS API QUERIES:
+/broadband?state=STATE_NAME_HERE&county=COUNTY_NAME_HERE
+** NOTE: Counties with two words or more should be entered with the '+' symbol between words
+
+**Caching:**
+When creating a new BroadbandHandler(), you can pass in a CacheType of MAX_SIZE, NO_LIMIT, or
+TIME to decide its eviction policy, as well as a numerical value for max size or time before
+deletion. If no cache is desired, NONE can be added as the cachetype.
