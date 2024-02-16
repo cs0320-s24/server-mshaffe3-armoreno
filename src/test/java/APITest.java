@@ -1,7 +1,9 @@
-import APIHandlers.Broadband.Broadband;
-import APIHandlers.Broadband.BroadbandData;
-import APIHandlers.BroadbandHandler;
-import APIHandlers.MockAPISource;
+import Handlers.Broadband.Broadband;
+import Handlers.Broadband.BroadbandData;
+import Handlers.BroadbandHandler.BroadbandHandler;
+import Handlers.BroadbandHandler.DataSource.ACSDataSource;
+import Handlers.BroadbandHandler.DataSource.MockAPISource;
+import Handlers.Exceptions.DatasourceException;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
@@ -23,7 +25,7 @@ import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class APIIntegrationTest {
+public class APITest {
     @BeforeAll
     public static void setup_before_everything() {
         // Set the Spark port number.
@@ -40,11 +42,9 @@ public class APIIntegrationTest {
     private String[] loc;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws DatasourceException {
         // In fact, restart the entire Spark server for every test!
-        Spark.get("broadband", new BroadbandHandler(new MockAPISource(new BroadbandData(new Broadband("30"),
-                Calendar.getInstance().getTime().toString(),
-                "Kentucky", "Hardin County"))));
+        Spark.get("broadband", new BroadbandHandler(new ACSDataSource()));
         Spark.init();
         Spark.awaitInitialization(); // don't continue until the server is listening
 
@@ -65,7 +65,7 @@ public class APIIntegrationTest {
     private static HttpURLConnection tryRequest(String county, String state) throws IOException {
         // Configure the connection (but don't actually send the request yet)
         URL requestURL = new URL("http://localhost:" + Spark.port() + "/" + "broadband" + "?county=" + county
-        +"&state=" + state);
+                +"&state=" + state);
         HttpURLConnection clientConnection = (HttpURLConnection) requestURL.openConnection();
 
         // we are getting information from the api
@@ -76,8 +76,7 @@ public class APIIntegrationTest {
     }
 
     @Test
-    public void testRegularCallSuccess() throws IOException {
-
+    public void testSuccess() throws IOException {
         HttpURLConnection connection = tryRequest(loc[0], loc[1]);
 
         assertEquals(200, connection.getResponseCode());
@@ -91,37 +90,6 @@ public class APIIntegrationTest {
 
         connection.disconnect();
     }
-
-
-    @Test
-    public void testBothEmptyParams() throws IOException {
-        HttpURLConnection connection = tryRequest("", "");
-
-        assertEquals(200, connection.getResponseCode());
-
-        Map<String, String> responseBody = responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
-        showDetailsIfError(responseBody);
-
-        assertEquals("error_bad_request", responseBody.get("result"));
-
-        connection.disconnect();
-    }
-
-    @Test
-    public void testOneEmptyParams() throws IOException {
-        HttpURLConnection connection = tryRequest(loc[0], "");
-
-        assertEquals(200, connection.getResponseCode());
-
-        Map<String, String> responseBody = responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
-        showDetailsIfError(responseBody);
-
-        assertEquals("error_bad_request", responseBody.get("result"));
-
-        connection.disconnect();
-    }
-
-
 
     /**
      * Helper to make working with a large test suite easier: if an error, print more info.

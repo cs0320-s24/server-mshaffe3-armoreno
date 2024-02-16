@@ -1,4 +1,4 @@
-package CSVHandlers;
+package Handlers.CSVHandlers;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;

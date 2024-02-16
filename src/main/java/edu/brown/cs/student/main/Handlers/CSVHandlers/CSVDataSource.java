@@ -1,4 +1,4 @@
-package CSVHandlers;
+package Handlers.CSVHandlers;
 
 import java.util.ArrayList;
 import java.util.List;

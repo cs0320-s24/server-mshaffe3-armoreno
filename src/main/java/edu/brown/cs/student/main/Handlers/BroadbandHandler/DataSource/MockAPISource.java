@@ -1,9 +1,6 @@
-package APIHandlers;
+package Handlers.BroadbandHandler.DataSource;
 
-import APIHandlers.Broadband.BroadbandData;
-import APIHandlers.Exceptions.DatasourceException;
-
-import java.util.concurrent.ExecutionException;
+import Handlers.Broadband.BroadbandData;
 
 public class MockAPISource implements APISource {
 

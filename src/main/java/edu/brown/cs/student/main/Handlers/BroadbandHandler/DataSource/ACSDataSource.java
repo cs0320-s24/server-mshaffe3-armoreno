@@ -1,8 +1,8 @@
-package APIHandlers;
+package Handlers.BroadbandHandler.DataSource;
 
-import APIHandlers.Exceptions.DatasourceException;
-import APIHandlers.Broadband.Broadband;
-import APIHandlers.Broadband.BroadbandData;
+import Handlers.Exceptions.DatasourceException;
+import Handlers.Broadband.Broadband;
+import Handlers.Broadband.BroadbandData;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;

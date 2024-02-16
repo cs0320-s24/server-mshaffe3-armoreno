@@ -1,9 +1,9 @@
-package CSVHandlers;
+package Handlers.CSVHandlers;
 
-import CSVHandlers.SearchFunctionality.Creators.CreatorFromRow;
-import CSVHandlers.SearchFunctionality.Creators.StringCreator;
-import APIHandlers.Exceptions.FactoryFailureException;
-import CSVHandlers.SearchFunctionality.Parser;
+import Handlers.CSVHandlers.SearchFunctionality.Creators.CreatorFromRow;
+import Handlers.CSVHandlers.SearchFunctionality.Creators.StringCreator;
+import Handlers.Exceptions.FactoryFailureException;
+import Handlers.CSVHandlers.SearchFunctionality.Parser;
 import com.squareup.moshi.Moshi;
 import java.io.BufferedReader;
 import java.io.FileReader;

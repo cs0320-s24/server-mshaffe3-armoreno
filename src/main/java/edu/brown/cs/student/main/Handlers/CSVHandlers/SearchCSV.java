@@ -1,8 +1,8 @@
-package CSVHandlers;
+package Handlers.CSVHandlers;
 
-import CSVHandlers.SearchFunctionality.Search;
-import APIHandlers.Exceptions.ValueNotFoundException;
-import CSVHandlers.ViewCSV.NoFileLoadedResponse;
+import Handlers.CSVHandlers.SearchFunctionality.Search;
+import Handlers.Exceptions.ValueNotFoundException;
+import Handlers.CSVHandlers.ViewCSV.NoFileLoadedResponse;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import java.util.HashMap;

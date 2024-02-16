@@ -1,4 +1,4 @@
-package APIHandlers.Exceptions;
+package Handlers.Exceptions;
 
 import java.util.ArrayList;
 import java.util.List;
