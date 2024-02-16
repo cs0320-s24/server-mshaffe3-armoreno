@@ -1,8 +1,9 @@
-import APIHandlers.Broadband.Broadband;
-import APIHandlers.Broadband.BroadbandData;
-import APIHandlers.BroadbandHandler;
 
-import APIHandlers.MockAPISource;
+import Handlers.Broadband.Broadband;
+import Handlers.Broadband.BroadbandData;
+import Handlers.BroadbandHandler.BroadbandHandler;
+import Handlers.BroadbandHandler.DataSource.CacheType;
+import Handlers.BroadbandHandler.DataSource.MockAPISource;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
@@ -22,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import spark.Spark;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-public class APIIntegrationTest{
 
+public class APIMockTests {
     @BeforeAll
     public static void setup_before_everything() {
         // Set the Spark port number.
@@ -42,7 +43,10 @@ public class APIIntegrationTest{
     @BeforeEach
     public void setup() {
         // In fact, restart the entire Spark server for every test!
-        Spark.get("broadband", new BroadbandHandler());
+
+        Spark.get("broadband", new BroadbandHandler(new MockAPISource(new BroadbandData("success",new Broadband("30"),
+                Calendar.getInstance().getTime().toString(),
+                "Kentucky", "Hardin County")), CacheType.MAX_SIZE, 1000));
         Spark.init();
         Spark.awaitInitialization(); // don't continue until the server is listening
 
@@ -60,9 +64,9 @@ public class APIIntegrationTest{
         Spark.awaitStop(); // don't proceed until the server is stopped
     }
 
-    private static HttpURLConnection tryRequest(String apiCall, String county, String state) throws IOException {
+    private static HttpURLConnection tryRequest(String county, String state) throws IOException {
         // Configure the connection (but don't actually send the request yet)
-        URL requestURL = new URL("http://localhost:" + Spark.port() + "/" + apiCall + "?county=" + county
+        URL requestURL = new URL("http://localhost:" + Spark.port() + "/" + "broadband" + "?county=" + county
         +"&state=" + state);
         HttpURLConnection clientConnection = (HttpURLConnection) requestURL.openConnection();
 
@@ -76,7 +80,7 @@ public class APIIntegrationTest{
     @Test
     public void testRegularCallSuccess() throws IOException {
 
-        HttpURLConnection connection = tryRequest("broadband", loc[0], loc[1]);
+        HttpURLConnection connection = tryRequest(loc[0], loc[1]);
 
         assertEquals(200, connection.getResponseCode());
 
@@ -85,7 +89,36 @@ public class APIIntegrationTest{
 
         assertEquals("success", responseBody.get("result"));
 
-        assertEquals(numDataAdapter.toJson(30), responseBody.get("broadband"));
+        assertEquals(numDataAdapter.toJson(30), responseBody.get("percentage"));
+
+        connection.disconnect();
+    }
+
+
+    @Test
+    public void testBothEmptyParams() throws IOException {
+        HttpURLConnection connection = tryRequest("", "");
+
+        assertEquals(200, connection.getResponseCode());
+
+        Map<String, String> responseBody = responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
+        showDetailsIfError(responseBody);
+
+        assertEquals("error_bad_request", responseBody.get("result"));
+
+        connection.disconnect();
+    }
+
+    @Test
+    public void testOneEmptyParams() throws IOException {
+        HttpURLConnection connection = tryRequest(loc[0], "");
+
+        assertEquals(200, connection.getResponseCode());
+
+        Map<String, String> responseBody = responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
+        showDetailsIfError(responseBody);
+
+        assertEquals("error_bad_request", responseBody.get("result"));
 
         connection.disconnect();
     }

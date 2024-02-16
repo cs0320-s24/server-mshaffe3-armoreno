@@ -1,8 +1,7 @@
-package APIHandlers;
+package Handlers.BroadbandHandler.DataSource;
 
-import APIHandlers.Broadband.BroadbandData;
-import Exceptions.DatasourceException;
-import com.google.common.cache.CacheBuilder;
+import Handlers.Exceptions.DatasourceException;
+import Handlers.Broadband.BroadbandData;import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
@@ -15,15 +14,10 @@ import java.util.concurrent.TimeUnit;
  * API calls, and a place for caching to occur.
  */
 public class ACSProxy implements APISource {
-<<<<<<< HEAD
-  // Datasource to be wrapped
-  private final ACSDataSource source;
-  // cache to store results
-=======
+
   //Datasource to be wrapped
   private final APISource source;
   //cache to store results
->>>>>>> fd598a9fbe5089ad4cdd0c6a5ac583c1b1e456a5
   private LoadingCache<Location, BroadbandData> cache;
   // determines what eviction policy cache should have
   private final CacheType type;
@@ -36,13 +30,9 @@ public class ACSProxy implements APISource {
    * @param typeAmount
    * @throws DatasourceException
    */
-<<<<<<< HEAD
-  public ACSProxy(CacheType myType, int typeAmount) throws DatasourceException {
-    this.source = new ACSDataSource();
-=======
+
   public ACSProxy(APISource dataSource, CacheType myType, int typeAmount) throws DatasourceException{
     this.source = dataSource;
->>>>>>> fd598a9fbe5089ad4cdd0c6a5ac583c1b1e456a5
     this.type = myType;
     this.makeCache(typeAmount);
   }
@@ -85,6 +75,7 @@ public class ACSProxy implements APISource {
           CacheBuilder.newBuilder().maximumSize(typeValue).recordStats().build(loader);
         // never delete results
       case NO_LIMIT -> this.cache = CacheBuilder.newBuilder().recordStats().build(loader);
+      case NONE -> this.cache = null;
     }
   }
 

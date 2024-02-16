@@ -1,7 +1,6 @@
-package APIHandlers;
-
-import APIHandlers.Broadband.BroadbandData;
-import Exceptions.DatasourceException;
+package Handlers.BroadbandHandler.DataSource;
+import Handlers.Exceptions.DatasourceException;
+import Handlers.Broadband.BroadbandData;
 import java.util.concurrent.ExecutionException;
 
 /**
