@@ -67,7 +67,7 @@ public class ACSProxy implements APISource {
         // delete results after access
       case TIME -> this.cache =
           CacheBuilder.newBuilder()
-              .expireAfterAccess(typeValue, TimeUnit.MINUTES)
+              .expireAfterAccess(typeValue, TimeUnit.SECONDS)
               .recordStats()
               .build(loader);
         // delete results after max size

@@ -12,6 +12,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestCache {
 
+
+    /**
+     * test that Proxy still works without using cache
+     *
+     * @throws DatasourceException - for making proxy
+     * @throws ExecutionException - for calling getBroadbandData
+     */
     @Test
     public void noCacheSuccess() throws DatasourceException, ExecutionException {
 
@@ -30,6 +37,12 @@ public class TestCache {
 
     }
 
+    /**
+     * test that eviction policy on max size works
+     *
+     * @throws DatasourceException - for making proxy
+     * @throws ExecutionException - for calling getBroadbandData
+     */
     @Test
     public void cacheMaxSizeSuccess() throws DatasourceException, ExecutionException {
 
@@ -75,10 +88,16 @@ public class TestCache {
         assertNotNull(acsProxy.getMap().get(new Location(new String[]{"california", "kings county"})));
     }
 
+    /**
+     * test that normal cache with no eviction policy works
+     *
+     * @throws DatasourceException - for making proxy
+     * @throws ExecutionException - for calling getBroadbandData
+     */
     @Test
     public void cacheNoLimitTest() throws DatasourceException, ExecutionException {
 
-        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.MAX_SIZE, 1);
+        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.NO_LIMIT, 1);
 
         //make sure cache is not null and empty before any call
         com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
@@ -116,10 +135,17 @@ public class TestCache {
 
     }
 
+
+    /**
+     * test that cache with time limit eviction policy works
+     *
+     * @throws DatasourceException - for making proxy
+     * @throws ExecutionException - for calling getBroadbandData
+     */
     @Test
-    public void cacheTimeLimitTest() throws DatasourceException, ExecutionException {
+    public void cacheTimeLimitTest() throws DatasourceException, ExecutionException, InterruptedException {
 
-        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.TIME, 1);
+        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.TIME, 2);
 
         //make sure cache is not null and empty before any call
         com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
@@ -135,26 +161,23 @@ public class TestCache {
         assertEquals("hardin county", testData.county());
         assertEquals("kentucky", testData.state());
 
+        //item is there so far
+        assertNotNull(acsProxy.getMap().get(new Location(new String[]{"kentucky", "hardin county"})));
+
         //cache should have loaded a search
         cacheStats = acsProxy.getStats();
         assertEquals(cacheStats.hitCount(), 0);
         assertEquals(cacheStats.loadCount(), 1);
         assertEquals(cacheStats.missCount(), 1);
 
-        //call the same thing again
-        testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
 
-        assertEquals("success", testData.result());
-        assertEquals("87.2", testData.percentage().percentage());
-        assertEquals("hardin county", testData.county());
-        assertEquals("kentucky", testData.state());
+        Thread.sleep(6000);
 
-        //cache's hitCount should have gone up by one
-        cacheStats = acsProxy.getStats();
-        assertEquals(cacheStats.hitCount(), 1);
-        assertEquals(cacheStats.loadCount(), 1);
-        assertEquals(cacheStats.missCount(), 1);
+        //cache should be empty again
+        assertEquals(acsProxy.getMap().toString(), "{}");
 
     }
+
+
 
 }
