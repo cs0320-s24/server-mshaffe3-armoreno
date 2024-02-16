@@ -76,7 +76,7 @@ public class BroadbandHandler implements Route {
     String targetState = request.queryParams("state");
     String county = request.queryParams("county");
 
-    if (targetState == null || county == null) {
+    if (targetState.isBlank() || county.isBlank()) {
       // Bad request! Send an error response.
       responseMap.put("result", "error_bad_request");
       responseMap.put("query_state", targetState);
@@ -108,9 +108,11 @@ public class BroadbandHandler implements Route {
       }
     } catch (DatasourceException e) {
       responseMap.put("result", e.getMessage());
+      responseMap.put("information", e.getCause().getMessage());
       return this.adapter.toJson(responseMap);
     }
 
+    System.out.println(responseMap);
     // return response in form of json to post to page
     return adapter.toJson(responseMap);
   }
