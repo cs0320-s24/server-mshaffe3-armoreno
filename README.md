@@ -35,7 +35,6 @@ The exceptions are primarily caught by the Handler classes themselves, as they a
 
 
 # Tests
-<<<<<<< HEAD
   **TestCache** - tests all possible cache options including: no cache, time-limit eviction policy, size eviction policy,
                 and normal cache
 
@@ -47,19 +46,6 @@ The exceptions are primarily caught by the Handler classes themselves, as they a
   **APITest** - tests our API by sending requests to the ACS API for things including: successful query, county doesn't 
                 exist in a state, state doesn't exist, and that we can successfully query after an error query
 
-
-
-  
-=======
-We tested thoroughly, both unit and integration testing. For CSV Handling, the search and parse
-functionalities were mostly tested from the last sprint, so the test suite focuses on the
-interaction between them, and how to handle malformed queries.
-
-For APIMockTests, we similarly tested malformed queries, including missing parameters and
-standard success responses.
-
-For API Unit tests,
->>>>>>> 31d448b4c4cb74e86b585f0abb4a875d0b09a7e2
 
 # How to
 **Queries:**
