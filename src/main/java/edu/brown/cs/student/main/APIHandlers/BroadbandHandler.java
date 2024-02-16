@@ -17,40 +17,69 @@ import spark.Route;
 public class BroadbandHandler implements Route {
   // The ACS Proxy acts as an intermediary for the datasource and is responsible for caching
   ACSProxy proxy;
-  Map<String, Object> responseMap;
-  JsonAdapter<Map<String, Object>> adapter;
+  Map<String, String> responseMap;
+  JsonAdapter<Map<String, String>> adapter;
+  Boolean instantiationError;
 
+<<<<<<< HEAD
   /** Constructor sets up the response map and calls instantiateshandling() */
   public BroadbandHandler() {
     // moshi adapter to build responses
+=======
+  /**
+   * Constructor sets up the response map and calls instantiateshandling()
+   */
+  public BroadbandHandler(APISource dataSource){
+    this.instantiationError = false;
+    //moshi adapter to build responses
+>>>>>>> fd598a9fbe5089ad4cdd0c6a5ac583c1b1e456a5
     Moshi moshi = new Moshi.Builder().build();
     Type mapStringString = Types.newParameterizedType(Map.class, String.class, String.class);
     this.adapter = moshi.adapter(mapStringString);
 
     // map to put results and send back to user
     this.responseMap = new HashMap<>();
-    this.instantiateHandling();
+    this.instantiateHandling(dataSource);
   }
 
   /**
    * This helper method creates a new Proxy with caching parameters If there is a datasource issue,
    * an informative error response is sent back
    */
+<<<<<<< HEAD
   private void instantiateHandling() {
     try {
       // new Proxy is created with cache parameters.
       this.proxy = new ACSProxy(CacheType.MAX_SIZE, 1000);
       // thrown from creation of ACSDatasource
     } catch (DatasourceException datasourceException) {
+=======
+  private void instantiateHandling(APISource dataSource){
+    try{
+      //new Proxy is created with cache parameters.
+        this.proxy = new ACSProxy(dataSource, CacheType.MAX_SIZE, 1000);
+      //thrown from creation of ACSDatasource
+      }catch(DatasourceException datasourceException) {
+        this.instantiationError = true;
+        this.responseMap.put("result", "error_datasource");
+        this.responseMap.put("information", datasourceException.getMessage());
+        if (datasourceException.getCause() != null) {
+          this.responseMap.put("cause", datasourceException.getCause().toString());
+        }
+>>>>>>> fd598a9fbe5089ad4cdd0c6a5ac583c1b1e456a5
 
       this.responseMap.put("result", "error_datasource");
       this.responseMap.put("information", datasourceException.getMessage());
       if (datasourceException.getCause() != null) {
         this.responseMap.put("cause", datasourceException.getCause());
       }
+<<<<<<< HEAD
     }
     // serializes the responseMap to a JSON
     this.adapter.toJson(responseMap);
+=======
+
+>>>>>>> fd598a9fbe5089ad4cdd0c6a5ac583c1b1e456a5
   }
 
   /**
@@ -63,6 +92,10 @@ public class BroadbandHandler implements Route {
    */
   @Override
   public Object handle(Request request, Response response) {
+    //if this is true, an error upon instantiation of datasource must have occurred
+    if(this.instantiationError){
+      return this.adapter.toJson(responseMap);
+    }
     this.responseMap = new HashMap<>();
     String targetState = request.queryParams("state");
     String county = request.queryParams("county");
@@ -87,7 +120,7 @@ public class BroadbandHandler implements Route {
 
         // want to return broadband percentage and time accessed
         responseMap.put("broadband", data.percentage().percentage());
-        responseMap.put("date accessed", data.dateTime().getTime().toString());
+        responseMap.put("date accessed", data.dateTime());
         responseMap.put("state", data.state());
         responseMap.put("county", data.county());
 
