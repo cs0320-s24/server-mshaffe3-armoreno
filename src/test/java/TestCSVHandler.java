@@ -18,18 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 import okio.Buffer;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Spark;
 
 public class TestCSVHandler {
   private CSVDataSource source;
-
-  @BeforeAll
-  private static void port(){
-    Spark.port(3939);
-  }
 
   @BeforeEach
   public void setup() {
@@ -73,7 +67,7 @@ public class TestCSVHandler {
    * @throws IOException
    */
   private void loadFile(String filename) throws IOException {
-    HttpURLConnection clientConnection = tryRequest("loadcsv?filepath="+ filename);
+    HttpURLConnection clientConnection = tryRequest("loadcsv?filepath=" + filename);
 
     // Get an OK response (the *connection* worked, the *API* provides an error response)
     Moshi moshi = new Moshi.Builder().build();

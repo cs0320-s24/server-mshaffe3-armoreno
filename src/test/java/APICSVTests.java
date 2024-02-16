@@ -35,8 +35,6 @@ public class APICSVTests {
 
   @BeforeAll
   public static void setup_before_everything() {
-    // Set the Spark port number.
-    Spark.port(3636);
 
     // Remove the logging spam during tests
     Logger.getLogger("").setLevel(Level.WARNING); // empty name = root logger
