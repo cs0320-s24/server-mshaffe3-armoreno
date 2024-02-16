@@ -1,7 +1,8 @@
 package Handlers.BroadbandHandler.DataSource;
 
+import Handlers.Broadband.BroadbandData;
 import Handlers.Exceptions.DatasourceException;
-import Handlers.Broadband.BroadbandData;import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.Locale;
@@ -15,9 +16,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class ACSProxy implements APISource {
 
-  //Datasource to be wrapped
+  // Datasource to be wrapped
   private final APISource source;
-  //cache to store results
+  // cache to store results
   private LoadingCache<Location, BroadbandData> cache;
   // determines what eviction policy cache should have
   private final CacheType type;
@@ -30,8 +31,8 @@ public class ACSProxy implements APISource {
    * @param typeAmount amount of time or size of cache for eviction policy
    * @throws DatasourceException from ACSDatasource
    */
-
-  public ACSProxy(APISource dataSource, CacheType myType, int typeAmount) throws DatasourceException{
+  public ACSProxy(APISource dataSource, CacheType myType, int typeAmount)
+      throws DatasourceException {
     this.source = dataSource;
     this.type = myType;
     this.makeCache(typeAmount);
@@ -58,7 +59,8 @@ public class ACSProxy implements APISource {
         new CacheLoader<>() {
 
           @Override
-          public BroadbandData load(Location location) throws DatasourceException, ExecutionException {
+          public BroadbandData load(Location location)
+              throws DatasourceException, ExecutionException {
             return makeRequest(location.loc);
           }
         };
@@ -108,7 +110,6 @@ public class ACSProxy implements APISource {
       // "get" works and recognizes possible exceptions
       BroadbandData result = cache.get(location);
       return result;
-
     }
     // if not in cache already
     return makeRequest(newLoc);
@@ -119,16 +120,15 @@ public class ACSProxy implements APISource {
    *
    * @return null if no cache is used and a caches stats if it is
    */
-  public com.google.common.cache.CacheStats getStats(){
-    if(this.cache == null){
+  public com.google.common.cache.CacheStats getStats() {
+    if (this.cache == null) {
       return null;
     }
-      return cache.stats();
-
+    return cache.stats();
   }
 
-  public ConcurrentMap<Location, BroadbandData> getMap(){
-    if(this.cache == null){
+  public ConcurrentMap<Location, BroadbandData> getMap() {
+    if (this.cache == null) {
       return null;
     }
     return cache.asMap();

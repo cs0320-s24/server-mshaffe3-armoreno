@@ -7,4 +7,5 @@ package Handlers.Broadband;
  *     county
  * @param dateTime - the time at which this data was accessed
  */
-public record BroadbandData(String result, Broadband percentage, String dateTime, String state, String county) {}
+public record BroadbandData(
+    String result, Broadband percentage, String dateTime, String state, String county) {}

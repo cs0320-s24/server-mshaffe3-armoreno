@@ -1,13 +1,8 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import Handlers.Broadband.Broadband;
-import Handlers.Broadband.BroadbandData;
 import Handlers.BroadbandHandler.BroadbandHandler;
 import Handlers.BroadbandHandler.DataSource.ACSDataSource;
-import Handlers.BroadbandHandler.DataSource.ACSProxy;
 import Handlers.BroadbandHandler.DataSource.CacheType;
-import Handlers.BroadbandHandler.DataSource.MockAPISource;
 import Handlers.CSVHandlers.CSVDataSource;
 import Handlers.CSVHandlers.LoadCSV;
 import Handlers.CSVHandlers.LoadCSV.FileLoadSuccessResponse;
@@ -23,7 +18,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -37,8 +31,7 @@ import spark.Spark;
 
 public class APICSVTests {
 
-  public APICSVTests() throws IOException {
-  }
+  public APICSVTests() throws IOException {}
 
   @BeforeAll
   public static void setup_before_everything() {
@@ -49,8 +42,8 @@ public class APICSVTests {
     Logger.getLogger("").setLevel(Level.WARNING); // empty name = root logger
   }
 
-  private final Type mapStringObject = Types.newParameterizedType(Map.class, String.class,
-      Object.class);
+  private final Type mapStringObject =
+      Types.newParameterizedType(Map.class, String.class, Object.class);
   private JsonAdapter<Map<String, String>> responseAdapter;
   private JsonAdapter<Integer> numDataAdapter;
 
@@ -61,8 +54,7 @@ public class APICSVTests {
     Spark.get("loadcsv", new LoadCSV(source));
     Spark.get("viewcsv", new ViewCSV(source));
     Spark.get("searchcsv", new SearchCSV(source));
-    Spark.get("broadband", new BroadbandHandler(
-        new ACSDataSource(), CacheType.NO_LIMIT, 0));
+    Spark.get("broadband", new BroadbandHandler(new ACSDataSource(), CacheType.NO_LIMIT, 0));
 
     Spark.init();
     Spark.awaitInitialization(); // don't continue until the server is listening
@@ -70,7 +62,6 @@ public class APICSVTests {
     Moshi moshi = new Moshi.Builder().build();
     responseAdapter = moshi.adapter(mapStringObject);
     numDataAdapter = moshi.adapter(Integer.class);
-
   }
 
   @AfterEach
@@ -97,24 +88,24 @@ public class APICSVTests {
 
   /**
    * Tests all API handlers to show full server capabilities
+   *
    * @throws IOException
    */
   @Test
   public void integrationTest() throws IOException {
-    //First, call loadcsv
-    HttpURLConnection loadConnection = tryRequest(
-        "loadcsv?filepath=data/census/RI_Census.csv");
+    // First, call loadcsv
+    HttpURLConnection loadConnection = tryRequest("loadcsv?filepath=data/census/RI_Census.csv");
     assertEquals(200, loadConnection.getResponseCode());
     Moshi moshi = new Moshi.Builder().build();
-    FileLoadSuccessResponse response = moshi
-        .adapter(FileLoadSuccessResponse.class)
-        .fromJson(new Buffer().readFrom(loadConnection.getInputStream()));
+    FileLoadSuccessResponse response =
+        moshi
+            .adapter(FileLoadSuccessResponse.class)
+            .fromJson(new Buffer().readFrom(loadConnection.getInputStream()));
     assertEquals("loadSuccess", response.response_type());
     loadConnection.disconnect();
 
-    //next, call broadband
-    HttpURLConnection bbConnection = tryRequest(
-        "broadband?state=Kentucky&county=Hardin+County");
+    // next, call broadband
+    HttpURLConnection bbConnection = tryRequest("broadband?state=Kentucky&county=Hardin+County");
     assertEquals(200, bbConnection.getResponseCode());
     Map<String, String> responseBody =
         responseAdapter.fromJson(new Buffer().readFrom(bbConnection.getInputStream()));
@@ -124,28 +115,27 @@ public class APICSVTests {
     assertEquals("kentucky", responseBody.get("state"));
     bbConnection.disconnect();
 
-    //now call searchcsv
-    HttpURLConnection searchConnection = tryRequest(
-        "searchcsv?value=Foster&identifier=City/Town");
+    // now call searchcsv
+    HttpURLConnection searchConnection = tryRequest("searchcsv?value=Foster&identifier=City/Town");
     assertEquals(200, searchConnection.getResponseCode());
-    SearchResultResponse result = moshi
-        .adapter(SearchResultResponse.class)
-        .fromJson(new Buffer().readFrom(searchConnection.getInputStream()));
+    SearchResultResponse result =
+        moshi
+            .adapter(SearchResultResponse.class)
+            .fromJson(new Buffer().readFrom(searchConnection.getInputStream()));
     searchConnection.disconnect();
     assertEquals("success", result.responseMap().get("search_result"));
     assertEquals(
         List.of(List.of("Foster", "'99,892.00'", "'118,000.00'", "'37,382.00'")),
         result.responseMap().get("data"));
 
-    //finally, viewcsv
-    HttpURLConnection viewConnection = tryRequest(
-        "viewcsv");
+    // finally, viewcsv
+    HttpURLConnection viewConnection = tryRequest("viewcsv");
     assertEquals(200, viewConnection.getResponseCode());
-    ViewLoadedResponse viewLoadedResponse = moshi
-        .adapter(ViewLoadedResponse.class)
-        .fromJson(new Buffer().readFrom(viewConnection.getInputStream()));
+    ViewLoadedResponse viewLoadedResponse =
+        moshi
+            .adapter(ViewLoadedResponse.class)
+            .fromJson(new Buffer().readFrom(viewConnection.getInputStream()));
     viewConnection.disconnect();
     assertEquals("fileViewSuccess", viewLoadedResponse.response_type());
-}
-
+  }
 }

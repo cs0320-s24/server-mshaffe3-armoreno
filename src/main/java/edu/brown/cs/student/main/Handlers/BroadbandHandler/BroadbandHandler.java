@@ -1,11 +1,10 @@
 package Handlers.BroadbandHandler;
 
-import Handlers.BroadbandHandler.DataSource.ACSDataSource;
+import Handlers.Broadband.BroadbandData;
 import Handlers.BroadbandHandler.DataSource.ACSProxy;
 import Handlers.BroadbandHandler.DataSource.APISource;
 import Handlers.BroadbandHandler.DataSource.CacheType;
 import Handlers.Exceptions.DatasourceException;
-import Handlers.Broadband.BroadbandData;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
@@ -24,12 +23,10 @@ public class BroadbandHandler implements Route {
   Map<String, String> responseMap;
   JsonAdapter<Map<String, String>> adapter;
   Boolean instantiationError;
-  /**
-   * Constructor sets up the response map and calls instantiateshandling()
-   */
-  public BroadbandHandler(APISource dataSource, CacheType cacheType, int typeAmount){
+  /** Constructor sets up the response map and calls instantiateshandling() */
+  public BroadbandHandler(APISource dataSource, CacheType cacheType, int typeAmount) {
     this.instantiationError = false;
-    //moshi adapter to build responses
+    // moshi adapter to build responses
 
     Moshi moshi = new Moshi.Builder().build();
     Type mapStringString = Types.newParameterizedType(Map.class, String.class, String.class);
@@ -44,24 +41,21 @@ public class BroadbandHandler implements Route {
    * This helper method creates a new Proxy with caching parameters If there is a datasource issue,
    * an informative error response is sent back
    */
-
-
-  private void instantiateHandling(APISource dataSource, CacheType cacheType, int num){
-    try{
-      //new Proxy is created with cache parameters.
-        this.proxy = new ACSProxy(dataSource, cacheType, num);
-      //thrown from creation of ACSDatasourcetyd
-      }catch(DatasourceException datasourceException) {
-        this.instantiationError = true;
-        this.responseMap.put("result", "error_datasource");
-        this.responseMap.put("information", datasourceException.getMessage());
-        if (datasourceException.getCause() != null) {
-          this.responseMap.put("cause", datasourceException.getCause().toString());
-        }
+  private void instantiateHandling(APISource dataSource, CacheType cacheType, int num) {
+    try {
+      // new Proxy is created with cache parameters.
+      this.proxy = new ACSProxy(dataSource, cacheType, num);
+      // thrown from creation of ACSDatasourcetyd
+    } catch (DatasourceException datasourceException) {
+      this.instantiationError = true;
+      this.responseMap.put("result", "error_datasource");
+      this.responseMap.put("information", datasourceException.getMessage());
+      if (datasourceException.getCause() != null) {
+        this.responseMap.put("cause", datasourceException.getCause().toString());
+      }
     }
     // serializes the responseMap to a JSON
     this.adapter.toJson(responseMap);
-
   }
 
   /**
@@ -74,8 +68,8 @@ public class BroadbandHandler implements Route {
    */
   @Override
   public Object handle(Request request, Response response) {
-    //if this is true, an error upon instantiation of datasource must have occurred
-    if(this.instantiationError){
+    // if this is true, an error upon instantiation of datasource must have occurred
+    if (this.instantiationError) {
       return this.adapter.toJson(responseMap);
     }
     this.responseMap = new HashMap<>();
