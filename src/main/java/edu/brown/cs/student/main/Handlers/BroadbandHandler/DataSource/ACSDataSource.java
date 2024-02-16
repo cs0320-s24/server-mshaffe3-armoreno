@@ -62,9 +62,9 @@ public class ACSDataSource implements APISource {
   /**
    * returns the ACS county code given a state name and county name by querying the API
    *
-   * @param stateName
-   * @param countyName
-   * @return
+   * @param stateName state of the county
+   * @param countyName county to obtain the code for
+   * @return countycode
    * @throws DatasourceException
    */
   private String getCounty(String stateName, String countyName) throws DatasourceException {
@@ -96,8 +96,8 @@ public class ACSDataSource implements APISource {
   /**
    * accesses the Hashmap created in the constructor of the class to return the state code
    *
-   * @param state
-   * @return
+   * @param state state name to get code for
+   * @return state code from map
    */
   private String getState(String state) throws DatasourceException {
     String stateCode = this.stateCodes.get(state.toLowerCase(Locale.US));
@@ -110,9 +110,8 @@ public class ACSDataSource implements APISource {
   /**
    * Returns a query from the ACS API in the form of broadband data
    *
-   * @param loc
-   * @return
-   * @throws IOException
+   * @param loc array with state, county codes
+   * @return BroadbandData for that location
    * @throws DatasourceException
    */
   @Override
@@ -124,9 +123,9 @@ public class ACSDataSource implements APISource {
    * Helper method that creates the URL and builds the record of Broadband Data from the body
    * returned from the query
    *
-   * @param state
-   * @param county
-   * @return
+   * @param state to search
+   * @param county to search
+   * @return BroadbandData
    * @throws DatasourceException
    */
   private BroadbandData queryACS(String state, String county)
@@ -162,8 +161,8 @@ public class ACSDataSource implements APISource {
   /**
    * This static method tries to connect to the API at the given URL
    *
-   * @param requestURL
-   * @return
+   * @param requestURL url to request
+   * @return connection to API
    * @throws DatasourceException
    */
   private static HttpURLConnection connect(URL requestURL) throws DatasourceException {
@@ -186,9 +185,8 @@ public class ACSDataSource implements APISource {
   /**
    * The helper method queries the API at the requested URL and uses moshi to deserialize it
    *
-   * @param requestURL
-   * @return
-   * @throws IOException
+   * @param requestURL url to query API
+   * @return deserialized JSON of information
    * @throws DatasourceException
    */
   private List<List<String>> getBody(URL requestURL) throws DatasourceException {
