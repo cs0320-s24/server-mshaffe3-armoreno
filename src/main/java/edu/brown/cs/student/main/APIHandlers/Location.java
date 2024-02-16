@@ -30,7 +30,6 @@ public class Location {
     }
     if (o == null || getClass() != o.getClass()) return false;
     Location that = (Location) o;
-    System.out.println(Arrays.equals(loc, that.loc));
     return Arrays.equals(this.loc, that.loc);
   }
 

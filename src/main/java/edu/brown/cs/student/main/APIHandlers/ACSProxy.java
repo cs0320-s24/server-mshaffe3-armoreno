@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ACSProxy implements APISource {
   //Datasource to be wrapped
-  private final ACSDataSource source;
+  private final APISource source;
   //cache to store results
   private LoadingCache<Location, BroadbandData> cache;
   //determines what eviction policy cache should have
@@ -29,8 +29,8 @@ public class ACSProxy implements APISource {
    * @param typeAmount
    * @throws DatasourceException
    */
-  public ACSProxy(CacheType myType, int typeAmount) throws DatasourceException{
-    this.source = new ACSDataSource();
+  public ACSProxy(APISource dataSource, CacheType myType, int typeAmount) throws DatasourceException{
+    this.source = dataSource;
     this.type = myType;
     this.makeCache(typeAmount);
   }
@@ -40,8 +40,8 @@ public class ACSProxy implements APISource {
    * wishes for no results to be cached.
    * @throws DatasourceException
    */
-  public ACSProxy() throws DatasourceException {
-    this.source = new ACSDataSource();
+  public ACSProxy(APISource dataSource) throws DatasourceException {
+    this.source = dataSource;
     this.type = null;
   }
 
@@ -54,7 +54,7 @@ public class ACSProxy implements APISource {
         new CacheLoader<>() {
 
           @Override
-          public BroadbandData load(Location location) throws DatasourceException {
+          public BroadbandData load(Location location) throws DatasourceException, ExecutionException {
             return makeRequest(location.loc);
           }
         };
@@ -82,7 +82,7 @@ public class ACSProxy implements APISource {
    * @throws DatasourceException - If accessing Datasource is a problem
    * @throws IOException
    */
-  private BroadbandData makeRequest(String[] loc) throws DatasourceException {
+  private BroadbandData makeRequest(String[] loc) throws DatasourceException, ExecutionException {
     return this.source.getBroadbandData(loc);
   }
 
@@ -103,7 +103,7 @@ public class ACSProxy implements APISource {
       // "get" works and recognizes possible exceptions
       BroadbandData result = cache.get(location);
       // For debugging and demo (would remove in a "real" version):
-      System.out.println(cache.stats());
+      //System.out.println(cache.stats());
       return result;
     }
     //if not in cache already

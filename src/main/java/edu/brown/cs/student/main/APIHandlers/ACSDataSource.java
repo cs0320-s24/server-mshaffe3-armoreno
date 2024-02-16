@@ -151,7 +151,7 @@ public class ACSDataSource implements APISource {
 
       // returns data needed in the form of a Broadband data
       return new BroadbandData(
-          new Broadband(body.get(1).get(1)), Calendar.getInstance(), state, county);
+          new Broadband(body.get(1).get(1)), Calendar.getInstance().getTime().toString(), state, county);
 
     } catch (IOException e) {
       throw new DatasourceException(e.getMessage(), e);

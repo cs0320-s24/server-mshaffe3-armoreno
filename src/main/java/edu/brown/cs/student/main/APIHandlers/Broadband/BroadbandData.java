@@ -9,4 +9,4 @@ import java.util.Calendar;
  *     county
  * @param dateTime - the time at which this data was accessed
  */
-public record BroadbandData(Broadband percentage, Calendar dateTime, String state, String county) {}
+public record BroadbandData(Broadband percentage, String dateTime, String state, String county) {}
