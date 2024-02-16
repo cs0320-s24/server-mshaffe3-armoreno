@@ -2,8 +2,8 @@ package CSVHandlers;
 
 import CSVHandlers.SearchFunctionality.Creators.CreatorFromRow;
 import CSVHandlers.SearchFunctionality.Creators.StringCreator;
-import APIHandlers.Exceptions.FactoryFailureException;
 import CSVHandlers.SearchFunctionality.Parser;
+import Exceptions.FactoryFailureException;
 import com.squareup.moshi.Moshi;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,7 +25,7 @@ public class LoadCSV implements Route {
 
     String filepath = request.queryParams("filepath");
     if (filepath == null) {
-      return new FileLoadFailureResponse(null,"no filepath provided");
+      return new FileLoadFailureResponse(null, "no filepath provided");
     }
 
     try {
@@ -48,7 +48,7 @@ public class LoadCSV implements Route {
    */
   private List<List<String>> parseData(String csvFileName)
       throws IOException, FactoryFailureException, IllegalAccessException {
-    if(!csvFileName.contains("/data")){
+    if (!csvFileName.contains("/data")) {
       throw new IllegalAccessException("File outside restricted directory");
     }
     // creates a buffered reader out of the fileName created
@@ -70,7 +70,9 @@ public class LoadCSV implements Route {
    */
   public record FileLoadSuccessResponse(String response_type, String filepath) {
     public FileLoadSuccessResponse(String filepath) {
-      this("loadSuccess", filepath);}
+      this("loadSuccess", filepath);
+    }
+
     String serialize() {
       Moshi moshi = new Moshi.Builder().build();
       return moshi.adapter(FileLoadSuccessResponse.class).toJson(this);
@@ -82,10 +84,12 @@ public class LoadCSV implements Route {
    *
    * @param response_type
    */
-  public record FileLoadFailureResponse(String response_type, String filepath, String error_message) {
+  public record FileLoadFailureResponse(
+      String response_type, String filepath, String error_message) {
     public FileLoadFailureResponse(String filepath, String error_message) {
       this("loadFailure", filepath, error_message);
     }
+
     String serialize() {
       Moshi moshi = new Moshi.Builder().build();
       return moshi.adapter(FileLoadFailureResponse.class).toJson(this);

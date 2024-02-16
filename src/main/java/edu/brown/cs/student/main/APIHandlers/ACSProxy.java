@@ -1,7 +1,7 @@
 package APIHandlers;
 
-import APIHandlers.Exceptions.DatasourceException;
 import APIHandlers.Broadband.BroadbandData;
+import Exceptions.DatasourceException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -15,29 +15,31 @@ import java.util.concurrent.TimeUnit;
  * API calls, and a place for caching to occur.
  */
 public class ACSProxy implements APISource {
-  //Datasource to be wrapped
+  // Datasource to be wrapped
   private final ACSDataSource source;
-  //cache to store results
+  // cache to store results
   private LoadingCache<Location, BroadbandData> cache;
-  //determines what eviction policy cache should have
+  // determines what eviction policy cache should have
   private final CacheType type;
 
   /**
-   * This constructor takes in a CacheType and numerical value to go with it, and makes a
-   * new cache and DataSource.
+   * This constructor takes in a CacheType and numerical value to go with it, and makes a new cache
+   * and DataSource.
+   *
    * @param myType
    * @param typeAmount
    * @throws DatasourceException
    */
-  public ACSProxy(CacheType myType, int typeAmount) throws DatasourceException{
+  public ACSProxy(CacheType myType, int typeAmount) throws DatasourceException {
     this.source = new ACSDataSource();
     this.type = myType;
     this.makeCache(typeAmount);
   }
 
   /**
-   * This copy constructor takes in no caching parameters and can be used if the developer
-   * wishes for no results to be cached.
+   * This copy constructor takes in no caching parameters and can be used if the developer wishes
+   * for no results to be cached.
+   *
    * @throws DatasourceException
    */
   public ACSProxy() throws DatasourceException {
@@ -47,9 +49,10 @@ public class ACSProxy implements APISource {
 
   /**
    * This helper method creates a cache based on the parameters passed into Proxy.
+   *
    * @param typeValue
    */
-  private void makeCache(int typeValue){
+  private void makeCache(int typeValue) {
     CacheLoader<Location, BroadbandData> loader =
         new CacheLoader<>() {
 
@@ -60,16 +63,16 @@ public class ACSProxy implements APISource {
         };
 
     switch (this.type) {
-      //delete results after access
+        // delete results after access
       case TIME -> this.cache =
           CacheBuilder.newBuilder()
               .expireAfterAccess(typeValue, TimeUnit.MINUTES)
               .recordStats()
               .build(loader);
-      //delete results after max size
+        // delete results after max size
       case MAX_SIZE -> this.cache =
           CacheBuilder.newBuilder().maximumSize(typeValue).recordStats().build(loader);
-      //never delete results
+        // never delete results
       case NO_LIMIT -> this.cache = CacheBuilder.newBuilder().recordStats().build(loader);
     }
   }
@@ -95,7 +98,8 @@ public class ACSProxy implements APISource {
    * @throws ExecutionException - if getBroadbandData throws an error
    */
   @Override
-  public BroadbandData getBroadbandData(String[] loc) throws DatasourceException, ExecutionException {
+  public BroadbandData getBroadbandData(String[] loc)
+      throws DatasourceException, ExecutionException {
     String[] newLoc = new String[] {loc[0].toLowerCase(Locale.US), loc[1].toLowerCase(Locale.US)};
 
     if (this.type != null) {
@@ -106,7 +110,7 @@ public class ACSProxy implements APISource {
       System.out.println(cache.stats());
       return result;
     }
-    //if not in cache already
+    // if not in cache already
     return makeRequest(newLoc);
   }
 }

@@ -1,2 +1,1 @@
-public class APIUnitTest {
-}
+public class APIUnitTest {}

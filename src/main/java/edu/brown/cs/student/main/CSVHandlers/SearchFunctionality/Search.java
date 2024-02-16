@@ -2,7 +2,7 @@ package CSVHandlers.SearchFunctionality;
 
 import static java.lang.Integer.parseInt;
 
-import APIHandlers.Exceptions.ValueNotFoundException;
+import Exceptions.ValueNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;

@@ -1,7 +1,7 @@
 package APIHandlers;
 
-import APIHandlers.Exceptions.DatasourceException;
 import APIHandlers.Broadband.BroadbandData;
+import Exceptions.DatasourceException;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
@@ -13,20 +13,16 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
-/**
- * This Class Handles API requests and returns broadband data for the queried state and county
- */
+/** This Class Handles API requests and returns broadband data for the queried state and county */
 public class BroadbandHandler implements Route {
-  //The ACS Proxy acts as an intermediary for the datasource and is responsible for caching
+  // The ACS Proxy acts as an intermediary for the datasource and is responsible for caching
   ACSProxy proxy;
   Map<String, Object> responseMap;
   JsonAdapter<Map<String, Object>> adapter;
 
-  /**
-   * Constructor sets up the response map and calls instantiateshandling()
-   */
-  public BroadbandHandler(){
-    //moshi adapter to build responses
+  /** Constructor sets up the response map and calls instantiateshandling() */
+  public BroadbandHandler() {
+    // moshi adapter to build responses
     Moshi moshi = new Moshi.Builder().build();
     Type mapStringString = Types.newParameterizedType(Map.class, String.class, String.class);
     this.adapter = moshi.adapter(mapStringString);
@@ -37,30 +33,30 @@ public class BroadbandHandler implements Route {
   }
 
   /**
-   * This helper method creates a new Proxy with caching parameters
-   * If there is a datasource issue, an informative error response is sent back
+   * This helper method creates a new Proxy with caching parameters If there is a datasource issue,
+   * an informative error response is sent back
    */
-  private void instantiateHandling(){
-    try{
-      //new Proxy is created with cache parameters.
-        this.proxy = new ACSProxy(CacheType.MAX_SIZE, 1000);
-      //thrown from creation of ACSDatasource
-      }catch(DatasourceException datasourceException) {
+  private void instantiateHandling() {
+    try {
+      // new Proxy is created with cache parameters.
+      this.proxy = new ACSProxy(CacheType.MAX_SIZE, 1000);
+      // thrown from creation of ACSDatasource
+    } catch (DatasourceException datasourceException) {
 
-        this.responseMap.put("result", "error_datasource");
-        this.responseMap.put("information", datasourceException.getMessage());
-        if (datasourceException.getCause() != null) {
-          this.responseMap.put("cause", datasourceException.getCause());
-        }
-
+      this.responseMap.put("result", "error_datasource");
+      this.responseMap.put("information", datasourceException.getMessage());
+      if (datasourceException.getCause() != null) {
+        this.responseMap.put("cause", datasourceException.getCause());
       }
-    //serializes the responseMap to a JSON
+    }
+    // serializes the responseMap to a JSON
     this.adapter.toJson(responseMap);
   }
 
   /**
    * The handle method returns a response to the server with broadband data, access time and date,
    * state and county queries; or, it returns an informative error response
+   *
    * @param request
    * @param response
    * @return
@@ -96,7 +92,7 @@ public class BroadbandHandler implements Route {
         responseMap.put("county", data.county());
 
       } catch (ExecutionException e) {
-        //is catching illegalArgument or datasource
+        // is catching illegalArgument or datasource
         responseMap.put("result", "error_bad_json");
         responseMap.put("information", e.getCause().getMessage());
         return this.adapter.toJson(responseMap);

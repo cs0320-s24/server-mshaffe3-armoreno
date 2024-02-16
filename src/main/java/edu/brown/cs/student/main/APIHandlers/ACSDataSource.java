@@ -1,8 +1,8 @@
 package APIHandlers;
 
-import APIHandlers.Exceptions.DatasourceException;
 import APIHandlers.Broadband.Broadband;
 import APIHandlers.Broadband.BroadbandData;
+import Exceptions.DatasourceException;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
@@ -19,8 +19,8 @@ import java.util.Map;
 import okio.Buffer;
 
 /**
- * This class represents a datasource for the ACS API. It makes queries to the ACS API for
- * broadband data.
+ * This class represents a datasource for the ACS API. It makes queries to the ACS API for broadband
+ * data.
  */
 public class ACSDataSource implements APISource {
   private final Map<String, String> stateCodes;
@@ -33,28 +33,28 @@ public class ACSDataSource implements APISource {
   }
 
   /**
-   * This helper method queries the API at the onset of the program to retrieve the list of
-   * state codes for future queries.
+   * This helper method queries the API at the onset of the program to retrieve the list of state
+   * codes for future queries.
+   *
    * @throws DatasourceException
    */
   private void buildMap() throws DatasourceException {
     try {
-      //deserialized data from request
+      // deserialized data from request
       List<List<String>> stateData =
-              this.getBody(
-                      new URL("https", "api.census.gov",
-                          "/data/2010/dec/sf1?get=NAME&for=state:*"));
-      //remove the row of headers
+          this.getBody(
+              new URL("https", "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=state:*"));
+      // remove the row of headers
       stateData.remove(0);
-      //loop through and populate the map
+      // loop through and populate the map
       for (List<String> row : stateData) {
         this.stateCodes.put(row.get(0).toLowerCase(Locale.US), row.get(1).toLowerCase(Locale.US));
       }
-      //throw more specific errors for the caller
+      // throw more specific errors for the caller
     } catch (IOException e) {
       throw new DatasourceException(e.getMessage(), e);
     } catch (DatasourceException e) {
-        throw new DatasourceException("Can't process initial API access");
+      throw new DatasourceException("Can't process initial API access");
     }
   }
 
@@ -100,7 +100,7 @@ public class ACSDataSource implements APISource {
    */
   private String getState(String state) throws DatasourceException {
     String stateCode = this.stateCodes.get(state.toLowerCase(Locale.US));
-    if(stateCode == null){
+    if (stateCode == null) {
       throw new DatasourceException("State doesn't exist: " + state);
     }
     return stateCode;
@@ -133,7 +133,7 @@ public class ACSDataSource implements APISource {
 
     // convert names into codes
     String stateCode = getState(state.toLowerCase(Locale.US));
-    //System.out.println(stateCode);
+    // System.out.println(stateCode);
     String countyCode = getCounty(state.toLowerCase(Locale.US), county.toLowerCase(Locale.US));
 
     // create moshi adapter to parse response from api
@@ -160,6 +160,7 @@ public class ACSDataSource implements APISource {
 
   /**
    * This static method tries to connect to the API at the given URL
+   *
    * @param requestURL
    * @return
    * @throws DatasourceException
