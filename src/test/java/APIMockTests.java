@@ -1,3 +1,4 @@
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import Handlers.Broadband.Broadband;
 import Handlers.Broadband.BroadbandData;
@@ -22,116 +23,119 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Spark;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class APIMockTests {
-    @BeforeAll
-    public static void setup_before_everything() {
-        // Set the Spark port number.
-        Spark.port(0);
+  @BeforeAll
+  public static void setup_before_everything() {
+    // Set the Spark port number.
+    Spark.port(0);
 
-        // Remove the logging spam during tests
-        Logger.getLogger("").setLevel(Level.WARNING); // empty name = root logger
-    }
+    // Remove the logging spam during tests
+    Logger.getLogger("").setLevel(Level.WARNING); // empty name = root logger
+  }
 
-    private final Type mapStringObject = Types.newParameterizedType(Map.class, String.class, Object.class);
-    private JsonAdapter<Map<String, String>> responseAdapter;
-    private JsonAdapter<Integer> numDataAdapter;
+  private final Type mapStringObject =
+      Types.newParameterizedType(Map.class, String.class, Object.class);
+  private JsonAdapter<Map<String, String>> responseAdapter;
+  private JsonAdapter<Integer> numDataAdapter;
 
-    private String[] loc;
+  private String[] loc;
 
-    @BeforeEach
-    public void setup() {
-        // In fact, restart the entire Spark server for every test!
+  @BeforeEach
+  public void setup() {
+    // In fact, restart the entire Spark server for every test!
 
-        Spark.get("broadband", new BroadbandHandler(new MockAPISource(new BroadbandData("success",new Broadband("30"),
-                Calendar.getInstance().getTime().toString(),
-                "Kentucky", "Hardin County")), CacheType.MAX_SIZE, 1000));
-        Spark.init();
-        Spark.awaitInitialization(); // don't continue until the server is listening
+    Spark.get(
+        "broadband",
+        new BroadbandHandler(
+            new MockAPISource(
+                new BroadbandData(
+                    "success",
+                    new Broadband("30"),
+                    Calendar.getInstance().getTime().toString(),
+                    "Kentucky",
+                    "Hardin County")),
+            CacheType.MAX_SIZE,
+            1000));
+    Spark.init();
+    Spark.awaitInitialization(); // don't continue until the server is listening
 
-        Moshi moshi = new Moshi.Builder().build();
-        responseAdapter = moshi.adapter(mapStringObject);
-        numDataAdapter = moshi.adapter(Integer.class);
+    Moshi moshi = new Moshi.Builder().build();
+    responseAdapter = moshi.adapter(mapStringObject);
+    numDataAdapter = moshi.adapter(Integer.class);
 
-        loc = new String[] {"Hardin+County", "Kentucky"};
-    }
+    loc = new String[] {"Hardin+County", "Kentucky"};
+  }
 
-    @AfterEach
-    public void teardown() {
-        // Gracefully stop Spark listening on both endpoints after each test
-        Spark.unmap("broadband");
-        Spark.awaitStop(); // don't proceed until the server is stopped
-    }
+  @AfterEach
+  public void teardown() {
+    // Gracefully stop Spark listening on both endpoints after each test
+    Spark.unmap("broadband");
+    Spark.awaitStop(); // don't proceed until the server is stopped
+  }
 
-    private static HttpURLConnection tryRequest(String county, String state) throws IOException {
-        // Configure the connection (but don't actually send the request yet)
-        URL requestURL = new URL("http://localhost:" + Spark.port() + "/" + "broadband" + "?county=" + county
-        +"&state=" + state);
-        HttpURLConnection clientConnection = (HttpURLConnection) requestURL.openConnection();
+  private static HttpURLConnection tryRequest(String county, String state) throws IOException {
+    // Configure the connection (but don't actually send the request yet)
+    URL requestURL =
+        new URL(
+            "http://localhost:"
+                + Spark.port()
+                + "/"
+                + "broadband"
+                + "?county="
+                + county
+                + "&state="
+                + state);
+    HttpURLConnection clientConnection = (HttpURLConnection) requestURL.openConnection();
 
-        // we are getting information from the api
-        clientConnection.setRequestMethod("GET");
+    // we are getting information from the api
+    clientConnection.setRequestMethod("GET");
 
-        clientConnection.connect();
-        return clientConnection;
-    }
+    clientConnection.connect();
+    return clientConnection;
+  }
 
-    @Test
-    public void testRegularCallSuccess() throws IOException {
+  @Test
+  public void testRegularCallSuccess() throws IOException {
 
-        HttpURLConnection connection = tryRequest(loc[0], loc[1]);
+    HttpURLConnection connection = tryRequest(loc[0], loc[1]);
 
-        assertEquals(200, connection.getResponseCode());
+    assertEquals(200, connection.getResponseCode());
 
-        Map<String, String> responseBody = responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
-        showDetailsIfError(responseBody);
+    Map<String, String> responseBody =
+        responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
 
-        assertEquals("success", responseBody.get("result"));
+    assertEquals("success", responseBody.get("result"));
 
-        assertEquals(numDataAdapter.toJson(30), responseBody.get("percentage"));
+    assertEquals(numDataAdapter.toJson(30), responseBody.get("percentage"));
 
-        connection.disconnect();
-    }
+    connection.disconnect();
+  }
 
+  @Test
+  public void testBothEmptyParams() throws IOException {
+    HttpURLConnection connection = tryRequest("", "");
 
-    @Test
-    public void testBothEmptyParams() throws IOException {
-        HttpURLConnection connection = tryRequest("", "");
+    assertEquals(200, connection.getResponseCode());
 
-        assertEquals(200, connection.getResponseCode());
+    Map<String, String> responseBody =
+        responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
 
-        Map<String, String> responseBody = responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
-        showDetailsIfError(responseBody);
+    assertEquals("error_bad_request", responseBody.get("result"));
 
-        assertEquals("error_bad_request", responseBody.get("result"));
+    connection.disconnect();
+  }
 
-        connection.disconnect();
-    }
+  @Test
+  public void testOneEmptyParams() throws IOException {
+    HttpURLConnection connection = tryRequest(loc[0], "");
 
-    @Test
-    public void testOneEmptyParams() throws IOException {
-        HttpURLConnection connection = tryRequest(loc[0], "");
+    assertEquals(200, connection.getResponseCode());
 
-        assertEquals(200, connection.getResponseCode());
+    Map<String, String> responseBody =
+        responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
 
-        Map<String, String> responseBody = responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
-        showDetailsIfError(responseBody);
+    assertEquals("error_bad_request", responseBody.get("result"));
 
-        assertEquals("error_bad_request", responseBody.get("result"));
-
-        connection.disconnect();
-    }
-
-
-
-    /**
-     * Helper to make working with a large test suite easier: if an error, print more info.
-     * @param body
-     */
-    private void showDetailsIfError(Map<String, String> body) {
-        if(body.containsKey("type") && "error".equals(body.get("result"))) {
-            System.out.println(body);
-        }
-    }
+    connection.disconnect();
+  }
 }

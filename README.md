@@ -23,5 +23,19 @@ the ACSDatasource in the case of broadband.
 # Errors/Bugs
 
 # Tests
+  **TestCache** - tests all possible cache options including: no cache, time-limit eviction policy, size eviction policy,
+                and normal cache
+
+  **APIMockTests** - tests our API using a mock data source for things including: successful query, both bad arguments, one bad argument
+
+  **TestCSVHandler** - tests CSV handler and all its functionalities including: loading a file, viewing a loaded file, 
+                    viewing an unloaded file, searching with headers, searching with index, and searching in general
+
+  **APITest** - tests our API by sending requests to the ACS API for things including: successful query, county doesn't 
+                exist in a state, state doesn't exist, and that we can successfully query after an error query
+
+
+
+  
 
 # How to

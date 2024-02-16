@@ -1,3 +1,4 @@
+import static org.junit.jupiter.api.Assertions.*;
 
 import Handlers.Broadband.BroadbandData;
 import Handlers.BroadbandHandler.DataSource.ACSDataSource;
@@ -5,179 +6,169 @@ import Handlers.BroadbandHandler.DataSource.ACSProxy;
 import Handlers.BroadbandHandler.DataSource.CacheType;
 import Handlers.BroadbandHandler.DataSource.Location;
 import Handlers.Exceptions.DatasourceException;
-import org.junit.jupiter.api.Test;
 import java.util.concurrent.ExecutionException;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+/** class tests proxy and cache used by Broadband Handler */
 public class TestCache {
 
+  /**
+   * test that Proxy still works without using cache
+   *
+   * @throws DatasourceException - for making proxy
+   * @throws ExecutionException - for calling getBroadbandData
+   */
+  @Test
+  public void noCacheSuccess() throws DatasourceException, ExecutionException {
 
-    /**
-     * test that Proxy still works without using cache
-     *
-     * @throws DatasourceException - for making proxy
-     * @throws ExecutionException - for calling getBroadbandData
-     */
-    @Test
-    public void noCacheSuccess() throws DatasourceException, ExecutionException {
+    ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.NONE, 0);
 
-        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.NONE, 0);
+    // make sure cache is null
+    assertNull(acsProxy.getStats());
 
-        //make sure cache is null
-        assertNull(acsProxy.getStats());
+    // can still make requests to API
+    BroadbandData testData = acsProxy.getBroadbandData(new String[] {"kentucky", "Hardin County"});
 
-        //can still make requests to API
-        BroadbandData testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+    assertEquals("success", testData.result());
+    assertEquals("87.2", testData.percentage().percentage());
+    assertEquals("hardin county", testData.county());
+    assertEquals("kentucky", testData.state());
+  }
 
-        assertEquals("success", testData.result());
-        assertEquals("87.2", testData.percentage().percentage());
-        assertEquals("hardin county", testData.county());
-        assertEquals("kentucky", testData.state());
+  /**
+   * test that eviction policy on max size works
+   *
+   * @throws DatasourceException - for making proxy
+   * @throws ExecutionException - for calling getBroadbandData
+   */
+  @Test
+  public void cacheMaxSizeSuccess() throws DatasourceException, ExecutionException {
 
-    }
+    ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.MAX_SIZE, 1);
 
-    /**
-     * test that eviction policy on max size works
-     *
-     * @throws DatasourceException - for making proxy
-     * @throws ExecutionException - for calling getBroadbandData
-     */
-    @Test
-    public void cacheMaxSizeSuccess() throws DatasourceException, ExecutionException {
+    // make a call
+    BroadbandData testData = acsProxy.getBroadbandData(new String[] {"kentucky", "Hardin County"});
 
-        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.MAX_SIZE, 1);
+    assertEquals("success", testData.result());
+    assertEquals("87.2", testData.percentage().percentage());
+    assertEquals("hardin county", testData.county());
+    assertEquals("kentucky", testData.state());
 
-        //make a call
-        BroadbandData testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+    // item exists in cache
+    assertNotNull(acsProxy.getMap().get(new Location(new String[] {"kentucky", "hardin county"})));
 
-        assertEquals("success", testData.result());
-        assertEquals("87.2", testData.percentage().percentage());
-        assertEquals("hardin county", testData.county());
-        assertEquals("kentucky", testData.state());
+    // call the same thing again
+    testData = acsProxy.getBroadbandData(new String[] {"kentucky", "Hardin County"});
 
-        //item exists in cache
-        assertNotNull(acsProxy.getMap().get(new Location(new String[]{"kentucky", "hardin county"})));
+    assertEquals("success", testData.result());
+    assertEquals("87.2", testData.percentage().percentage());
+    assertEquals("hardin county", testData.county());
+    assertEquals("kentucky", testData.state());
 
-        //call the same thing again
-        testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+    // cache's hitCount should have gone up by one
+    com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
+    assertEquals(cacheStats.hitCount(), 1);
+    assertEquals(cacheStats.loadCount(), 1);
+    assertEquals(cacheStats.missCount(), 1);
 
-        assertEquals("success", testData.result());
-        assertEquals("87.2", testData.percentage().percentage());
-        assertEquals("hardin county", testData.county());
-        assertEquals("kentucky", testData.state());
+    // make a different call
+    testData = acsProxy.getBroadbandData(new String[] {"california", "kings county"});
 
-        //cache's hitCount should have gone up by one
-        com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
-        assertEquals(cacheStats.hitCount(), 1);
-        assertEquals(cacheStats.loadCount(), 1);
-        assertEquals(cacheStats.missCount(), 1);
+    assertEquals("success", testData.result());
+    assertEquals("83.5", testData.percentage().percentage());
+    assertEquals("kings county", testData.county());
+    assertEquals("california", testData.state());
 
-        //make a different call
-        testData = acsProxy.getBroadbandData(new String[]{"california", "kings county"});
+    // previous item no longer exists in cache
+    assertNull(acsProxy.getMap().get(new Location(new String[] {"kentucky", "hardin county"})));
+    // new item exists in cache now
+    assertNotNull(acsProxy.getMap().get(new Location(new String[] {"california", "kings county"})));
+  }
 
-        assertEquals("success", testData.result());
-        assertEquals("83.5", testData.percentage().percentage());
-        assertEquals("kings county", testData.county());
-        assertEquals("california", testData.state());
+  /**
+   * test that normal cache with no eviction policy works
+   *
+   * @throws DatasourceException - for making proxy
+   * @throws ExecutionException - for calling getBroadbandData
+   */
+  @Test
+  public void cacheNoLimitTest() throws DatasourceException, ExecutionException {
 
+    ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.NO_LIMIT, 1);
 
-        //previous item no longer exists in cache
-        assertNull(acsProxy.getMap().get(new Location(new String[]{"kentucky", "hardin county"})));
-        //new item exists in cache now
-        assertNotNull(acsProxy.getMap().get(new Location(new String[]{"california", "kings county"})));
-    }
+    // make sure cache is not null and empty before any call
+    com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
+    assertEquals(cacheStats.hitCount(), 0);
+    assertEquals(cacheStats.loadCount(), 0);
+    assertEquals(cacheStats.missCount(), 0);
 
-    /**
-     * test that normal cache with no eviction policy works
-     *
-     * @throws DatasourceException - for making proxy
-     * @throws ExecutionException - for calling getBroadbandData
-     */
-    @Test
-    public void cacheNoLimitTest() throws DatasourceException, ExecutionException {
+    // make a call
+    BroadbandData testData = acsProxy.getBroadbandData(new String[] {"kentucky", "Hardin County"});
 
-        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.NO_LIMIT, 1);
+    assertEquals("success", testData.result());
+    assertEquals("87.2", testData.percentage().percentage());
+    assertEquals("hardin county", testData.county());
+    assertEquals("kentucky", testData.state());
 
-        //make sure cache is not null and empty before any call
-        com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
-        assertEquals(cacheStats.hitCount(), 0);
-        assertEquals(cacheStats.loadCount(), 0);
-        assertEquals(cacheStats.missCount(), 0);
+    // cache should have loaded a search
+    cacheStats = acsProxy.getStats();
+    assertEquals(cacheStats.hitCount(), 0);
+    assertEquals(cacheStats.loadCount(), 1);
+    assertEquals(cacheStats.missCount(), 1);
 
-        //make a call
-        BroadbandData testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+    // call the same thing again
+    testData = acsProxy.getBroadbandData(new String[] {"kentucky", "Hardin County"});
 
-        assertEquals("success", testData.result());
-        assertEquals("87.2", testData.percentage().percentage());
-        assertEquals("hardin county", testData.county());
-        assertEquals("kentucky", testData.state());
+    assertEquals("success", testData.result());
+    assertEquals("87.2", testData.percentage().percentage());
+    assertEquals("hardin county", testData.county());
+    assertEquals("kentucky", testData.state());
 
-        //cache should have loaded a search
-        cacheStats = acsProxy.getStats();
-        assertEquals(cacheStats.hitCount(), 0);
-        assertEquals(cacheStats.loadCount(), 1);
-        assertEquals(cacheStats.missCount(), 1);
+    // cache's hitCount should have gone up by one
+    cacheStats = acsProxy.getStats();
+    assertEquals(cacheStats.hitCount(), 1);
+    assertEquals(cacheStats.loadCount(), 1);
+    assertEquals(cacheStats.missCount(), 1);
+  }
 
-        //call the same thing again
-        testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
+  /**
+   * test that cache with time limit eviction policy works
+   *
+   * @throws DatasourceException - for making proxy
+   * @throws ExecutionException - for calling getBroadbandData
+   */
+  @Test
+  public void cacheTimeLimitTest()
+      throws DatasourceException, ExecutionException, InterruptedException {
 
-        assertEquals("success", testData.result());
-        assertEquals("87.2", testData.percentage().percentage());
-        assertEquals("hardin county", testData.county());
-        assertEquals("kentucky", testData.state());
+    ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.TIME, 2);
 
-        //cache's hitCount should have gone up by one
-        cacheStats = acsProxy.getStats();
-        assertEquals(cacheStats.hitCount(), 1);
-        assertEquals(cacheStats.loadCount(), 1);
-        assertEquals(cacheStats.missCount(), 1);
+    // make sure cache is not null and empty before any call
+    com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
+    assertEquals(cacheStats.hitCount(), 0);
+    assertEquals(cacheStats.loadCount(), 0);
+    assertEquals(cacheStats.missCount(), 0);
 
-    }
+    // make a call
+    BroadbandData testData = acsProxy.getBroadbandData(new String[] {"kentucky", "Hardin County"});
 
+    assertEquals("success", testData.result());
+    assertEquals("87.2", testData.percentage().percentage());
+    assertEquals("hardin county", testData.county());
+    assertEquals("kentucky", testData.state());
 
-    /**
-     * test that cache with time limit eviction policy works
-     *
-     * @throws DatasourceException - for making proxy
-     * @throws ExecutionException - for calling getBroadbandData
-     */
-    @Test
-    public void cacheTimeLimitTest() throws DatasourceException, ExecutionException, InterruptedException {
+    // item is there so far
+    assertNotNull(acsProxy.getMap().get(new Location(new String[] {"kentucky", "hardin county"})));
 
-        ACSProxy acsProxy = new ACSProxy(new ACSDataSource(), CacheType.TIME, 2);
+    // cache should have loaded a search
+    cacheStats = acsProxy.getStats();
+    assertEquals(cacheStats.hitCount(), 0);
+    assertEquals(cacheStats.loadCount(), 1);
+    assertEquals(cacheStats.missCount(), 1);
 
-        //make sure cache is not null and empty before any call
-        com.google.common.cache.CacheStats cacheStats = acsProxy.getStats();
-        assertEquals(cacheStats.hitCount(), 0);
-        assertEquals(cacheStats.loadCount(), 0);
-        assertEquals(cacheStats.missCount(), 0);
+    Thread.sleep(6000);
 
-        //make a call
-        BroadbandData testData = acsProxy.getBroadbandData(new String[]{"kentucky", "Hardin County"});
-
-        assertEquals("success", testData.result());
-        assertEquals("87.2", testData.percentage().percentage());
-        assertEquals("hardin county", testData.county());
-        assertEquals("kentucky", testData.state());
-
-        //item is there so far
-        assertNotNull(acsProxy.getMap().get(new Location(new String[]{"kentucky", "hardin county"})));
-
-        //cache should have loaded a search
-        cacheStats = acsProxy.getStats();
-        assertEquals(cacheStats.hitCount(), 0);
-        assertEquals(cacheStats.loadCount(), 1);
-        assertEquals(cacheStats.missCount(), 1);
-
-
-        Thread.sleep(6000);
-
-        //cache should be empty again
-        assertEquals(acsProxy.getMap().toString(), "{}");
-
-    }
-
-
-
+    // cache should be empty again
+    assertEquals(acsProxy.getMap().toString(), "{}");
+  }
 }
