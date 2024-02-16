@@ -35,15 +35,6 @@ public class ACSProxy implements APISource {
     this.makeCache(typeAmount);
   }
 
-  /**
-   * This copy constructor takes in no caching parameters and can be used if the developer
-   * wishes for no results to be cached.
-   * @throws DatasourceException
-   */
-  public ACSProxy(APISource dataSource) throws DatasourceException {
-    this.source = dataSource;
-    this.type = null;
-  }
 
   /**
    * This helper method creates a cache based on the parameters passed into Proxy.
@@ -71,6 +62,7 @@ public class ACSProxy implements APISource {
           CacheBuilder.newBuilder().maximumSize(typeValue).recordStats().build(loader);
       //never delete results
       case NO_LIMIT -> this.cache = CacheBuilder.newBuilder().recordStats().build(loader);
+      case NONE -> this.cache = null;
     }
   }
 

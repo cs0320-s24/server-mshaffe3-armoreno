@@ -85,7 +85,7 @@ public class ACSDataSource implements APISource {
           return county.get(2);
         }
       }
-      throw new DatasourceException("No such county in provided state: " + countyName);
+      throw new DatasourceException("No such county in provided state: " + stateName);
 
     } catch (IOException e) {
       throw new DatasourceException(e.getMessage(), e);
@@ -150,7 +150,7 @@ public class ACSDataSource implements APISource {
                       + "&key=c62c39cc48683fae5510e74dbad5e1aa8cd6ed5a"));
 
       // returns data needed in the form of a Broadband data
-      return new BroadbandData(
+      return new BroadbandData("success",
           new Broadband(body.get(1).get(1)), Calendar.getInstance().getTime().toString(), state, county);
 
     } catch (IOException e) {

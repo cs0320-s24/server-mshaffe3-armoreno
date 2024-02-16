@@ -1,6 +1,7 @@
 import Handlers.Broadband.Broadband;
 import Handlers.Broadband.BroadbandData;
 import Handlers.BroadbandHandler.BroadbandHandler;
+import Handlers.BroadbandHandler.DataSource.CacheType;
 import Handlers.BroadbandHandler.DataSource.MockAPISource;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -42,9 +43,9 @@ public class APIMockTests {
     @BeforeEach
     public void setup() {
         // In fact, restart the entire Spark server for every test!
-        Spark.get("broadband", new BroadbandHandler(new MockAPISource(new BroadbandData(new Broadband("30"),
+        Spark.get("broadband", new BroadbandHandler(new MockAPISource(new BroadbandData("success",new Broadband("30"),
                 Calendar.getInstance().getTime().toString(),
-                "Kentucky", "Hardin County"))));
+                "Kentucky", "Hardin County")), CacheType.MAX_SIZE, 1000));
         Spark.init();
         Spark.awaitInitialization(); // don't continue until the server is listening
 
@@ -87,7 +88,7 @@ public class APIMockTests {
 
         assertEquals("success", responseBody.get("result"));
 
-        assertEquals(numDataAdapter.toJson(30), responseBody.get("broadband"));
+        assertEquals(numDataAdapter.toJson(30), responseBody.get("percentage"));
 
         connection.disconnect();
     }

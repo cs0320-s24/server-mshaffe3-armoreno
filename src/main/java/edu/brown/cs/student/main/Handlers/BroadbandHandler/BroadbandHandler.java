@@ -29,7 +29,7 @@ public class BroadbandHandler implements Route {
   /**
    * Constructor sets up the response map and calls instantiateshandling()
    */
-  public BroadbandHandler(APISource dataSource){
+  public BroadbandHandler(APISource dataSource, CacheType cacheType, int typeAmount){
     this.instantiationError = false;
     //moshi adapter to build responses
     Moshi moshi = new Moshi.Builder().build();
@@ -38,17 +38,17 @@ public class BroadbandHandler implements Route {
 
     // map to put results and send back to user
     this.responseMap = new HashMap<>();
-    this.instantiateHandling(dataSource);
+    this.instantiateHandling(dataSource, cacheType, typeAmount);
   }
 
   /**
    * This helper method creates a new Proxy with caching parameters
    * If there is a datasource issue, an informative error response is sent back
    */
-  private void instantiateHandling(APISource dataSource){
+  private void instantiateHandling(APISource dataSource, CacheType cacheType, int num){
     try{
       //new Proxy is created with cache parameters.
-        this.proxy = new ACSProxy(dataSource, CacheType.MAX_SIZE, 1000);
+        this.proxy = new ACSProxy(dataSource, cacheType, num);
       //thrown from creation of ACSDatasource
       }catch(DatasourceException datasourceException) {
         this.instantiationError = true;
@@ -95,11 +95,10 @@ public class BroadbandHandler implements Route {
         // gets data using above parameters and querying the api
         BroadbandData data = this.proxy.getBroadbandData(new String[] {targetState, county});
         // If getBroadbandData returns with no issue, build response
-        responseMap.put("result", "success");
-
+        responseMap.put("result", data.result());
         // want to return broadband percentage and time accessed
-        responseMap.put("broadband", data.percentage().percentage());
-        responseMap.put("date accessed", data.dateTime());
+        responseMap.put("percentage", data.percentage().percentage());
+        responseMap.put("dateTime", data.dateTime());
         responseMap.put("state", data.state());
         responseMap.put("county", data.county());
 
