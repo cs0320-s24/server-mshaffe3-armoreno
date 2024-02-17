@@ -29,10 +29,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Spark;
 
+/** Tests integration between CSVHandlers and BroadbandHandlers */
 public class APICSVTests {
 
-  public APICSVTests() throws IOException {}
-
+  /** setup before all tests */
   @BeforeAll
   public static void setup_before_everything() {
 
@@ -45,6 +45,11 @@ public class APICSVTests {
   private JsonAdapter<Map<String, String>> responseAdapter;
   private JsonAdapter<Integer> numDataAdapter;
 
+  /**
+   * set up handlers before each test
+   *
+   * @throws DatasourceException
+   */
   @BeforeEach
   public void setup() throws DatasourceException {
     CSVDataSource source = new CSVDataSource();
@@ -62,6 +67,7 @@ public class APICSVTests {
     numDataAdapter = moshi.adapter(Integer.class);
   }
 
+  /** clean up handlers after each test */
   @AfterEach
   public void teardown() {
     // Gracefully stop Spark listening on both endpoints after each test
@@ -72,6 +78,13 @@ public class APICSVTests {
     Spark.awaitStop(); // don't proceed until the server is stopped
   }
 
+  /**
+   * helper method to make api calls
+   *
+   * @param apiCall - which handler to activate
+   * @return - api connection
+   * @throws IOException - thrown by URL
+   */
   private static HttpURLConnection tryRequest(String apiCall) throws IOException {
     // Configure the connection (but don't actually send the request yet)
     URL requestURL = new URL("http://localhost:" + Spark.port() + "/" + apiCall);
@@ -87,7 +100,7 @@ public class APICSVTests {
   /**
    * Tests all API handlers to show full server capabilities
    *
-   * @throws IOException
+   * @throws IOException - thrown by moshi
    */
   @Test
   public void integrationTest() throws IOException {

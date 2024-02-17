@@ -23,7 +23,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Spark;
 
+/** this class tests our API using a mock data source */
 public class APIMockTests {
+
+  /** runs before all tests */
   @BeforeAll
   public static void setup_before_everything() {
 
@@ -38,6 +41,7 @@ public class APIMockTests {
 
   private String[] loc;
 
+  /** sets up broadband handler before every test */
   @BeforeEach
   public void setup() {
     // In fact, restart the entire Spark server for every test!
@@ -64,6 +68,7 @@ public class APIMockTests {
     loc = new String[] {"Hardin+County", "Kentucky"};
   }
 
+  /** cleans up handler after every test */
   @AfterEach
   public void teardown() {
     // Gracefully stop Spark listening on both endpoints after each test
@@ -71,6 +76,14 @@ public class APIMockTests {
     Spark.awaitStop(); // don't proceed until the server is stopped
   }
 
+  /**
+   * helper method to help make api requests to broadband
+   *
+   * @param county - county to query
+   * @param state - state to query
+   * @return - api connection
+   * @throws IOException - thrown by URL
+   */
   private static HttpURLConnection tryRequest(String county, String state) throws IOException {
     // Configure the connection (but don't actually send the request yet)
     URL requestURL =
@@ -92,6 +105,11 @@ public class APIMockTests {
     return clientConnection;
   }
 
+  /**
+   * tests a regular call from mock api
+   *
+   * @throws IOException - thrown by responseAdapter
+   */
   @Test
   public void testRegularCallSuccess() throws IOException {
 
@@ -109,6 +127,11 @@ public class APIMockTests {
     connection.disconnect();
   }
 
+  /**
+   * tests if both parameters are blank
+   *
+   * @throws IOException - thrown by responseAdapter
+   */
   @Test
   public void testBothEmptyParams() throws IOException {
     HttpURLConnection connection = tryRequest("", "");
@@ -122,6 +145,11 @@ public class APIMockTests {
     connection.disconnect();
   }
 
+  /**
+   * tests if one parameter is empty
+   *
+   * @throws IOException - thrown by responseAdapter
+   */
   @Test
   public void testOneEmptyParams() throws IOException {
     HttpURLConnection connection = tryRequest(loc[0], "");
@@ -134,16 +162,5 @@ public class APIMockTests {
     assertEquals("error_bad_request", responseBody.get("result"));
 
     connection.disconnect();
-  }
-
-  /**
-   * Helper to make working with a large test suite easier: if an error, print more info.
-   *
-   * @param body
-   */
-  private void showDetailsIfError(Map<String, String> body) {
-    if (body.containsKey("type") && "error".equals(body.get("result"))) {
-      System.out.println(body);
-    }
   }
 }

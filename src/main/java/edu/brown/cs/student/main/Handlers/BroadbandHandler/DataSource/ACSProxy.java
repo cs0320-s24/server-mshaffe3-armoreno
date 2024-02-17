@@ -2,10 +2,7 @@ package Handlers.BroadbandHandler.DataSource;
 
 import Handlers.Broadband.BroadbandData;
 import Handlers.Exceptions.DatasourceException;
-<<<<<<< HEAD
-=======
 import com.google.common.cache.CacheBuilder;
->>>>>>> 31d448b4c4cb74e86b585f0abb4a875d0b09a7e2
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.Locale;
@@ -129,13 +126,11 @@ public class ACSProxy implements APISource {
     }
     return cache.stats();
   }
-
-<<<<<<< HEAD
   /**
-   * @return
+   * gives a copy of cache as a map for testing purposes
+   *
+   * @return map of cache as a map
    */
-=======
->>>>>>> 31d448b4c4cb74e86b585f0abb4a875d0b09a7e2
   public ConcurrentMap<Location, BroadbandData> getMap() {
     if (this.cache == null) {
       return null;

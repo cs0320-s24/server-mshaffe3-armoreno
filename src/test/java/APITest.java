@@ -22,8 +22,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Spark;
 
-
+/** tests ACSDataSource and APIHandler functionality */
 public class APITest {
+
+  /** set up server before all tests */
   @BeforeAll
   public static void setup_before_everything() {
     // Remove the logging spam during tests
@@ -98,7 +100,6 @@ public class APITest {
    *
    * @throws IOException - thrown by responseAdapter
    */
-
   @Test
   public void testSuccess() throws IOException {
     HttpURLConnection connection = tryRequest(loc[0], loc[1]);
@@ -135,13 +136,11 @@ public class APITest {
     connection.disconnect();
   }
 
-
   /**
    * test if you try to search a county in the wrong state
    *
    * @throws IOException - thrown by responseAdapter
    */
-
   @Test
   public void testWrongState() throws IOException {
     HttpURLConnection connection = tryRequest(loc[0], "California");
@@ -151,7 +150,6 @@ public class APITest {
     Map<String, String> responseBody =
         responseAdapter.fromJson(new Buffer().readFrom(connection.getInputStream()));
 
-
     assertEquals("error_bad_json", responseBody.get("result"));
     assertEquals("No such county in provided state: california", responseBody.get("information"));
 
@@ -159,7 +157,6 @@ public class APITest {
   }
 
   /**
-<<<<<<< HEAD
    * tests that requests still work after an error request
    *
    * @throws IOException - thrown by the responseAdaptor
@@ -193,6 +190,5 @@ public class APITest {
     assertEquals("kentucky", responseBody.get("state"));
 
     connection.disconnect();
-
   }
 }

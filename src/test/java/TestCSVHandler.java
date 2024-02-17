@@ -2,9 +2,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import Handlers.CSVHandlers.CSVDataSource;
+import Handlers.CSVHandlers.LoadCSV;
 import Handlers.CSVHandlers.LoadCSV.FileLoadSuccessResponse;
 import Handlers.CSVHandlers.SearchCSV;
-import Handlers.CSVHandlers.LoadCSV;
 import Handlers.CSVHandlers.SearchCSV.InvalidSearchResponse;
 import Handlers.CSVHandlers.SearchCSV.SearchResultResponse;
 import Handlers.CSVHandlers.ViewCSV;
@@ -22,9 +22,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Spark;
 
+/** tests all CSVHandler functionality */
 public class TestCSVHandler {
   private CSVDataSource source;
 
+  /** called before each test to set up handlers */
   @BeforeEach
   public void setup() {
     // Re-initialize state, etc. for _every_ test method run
@@ -38,6 +40,7 @@ public class TestCSVHandler {
     Spark.awaitInitialization(); // don't continue until the server is listening
   }
 
+  /** cleans up all handlers */
   @AfterEach
   public void teardown() {
     // Gracefully stop Spark listening on both endpoints after each test
@@ -47,6 +50,13 @@ public class TestCSVHandler {
     Spark.awaitStop(); // don't proceed until the server is stopped
   }
 
+  /**
+   * helper methods to make calls to api
+   *
+   * @param apiCall - handler to call
+   * @return - connection to api
+   * @throws IOException - thrown by URL
+   */
   private static HttpURLConnection tryRequest(String apiCall) throws IOException {
     // Configure the connection (but don't actually send the request yet)
     URL requestURL = new URL("http://localhost:" + Spark.port() + "/" + apiCall);
@@ -63,8 +73,8 @@ public class TestCSVHandler {
   /**
    * Helper method that calls the loadcsv handler for view and search tests
    *
-   * @param filename
-   * @throws IOException
+   * @param filename - file to load
+   * @throws IOException - thrown by tryRequest
    */
   private void loadFile(String filename) throws IOException {
     HttpURLConnection clientConnection = tryRequest("loadcsv?filepath=" + filename);
@@ -78,6 +88,11 @@ public class TestCSVHandler {
     clientConnection.disconnect();
   }
 
+  /**
+   * tests load failure
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testLoadFailure() throws IOException {
     HttpURLConnection clientConnection = tryRequest("loadcsv?filepath=null");
@@ -93,6 +108,11 @@ public class TestCSVHandler {
     clientConnection.disconnect();
   }
 
+  /**
+   * tests a successful load
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testLoadSuccess() throws IOException {
     HttpURLConnection clientConnection = tryRequest("loadcsv?filepath=data/stars/stardata.csv");
@@ -108,6 +128,11 @@ public class TestCSVHandler {
     assertTrue(this.source.getData().get(0).contains("StarID"));
   }
 
+  /**
+   * tests viewing a loaded file
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testViewCSVLoaded() throws IOException {
     this.loadFile("data/stars/stardata.csv");
@@ -122,6 +147,11 @@ public class TestCSVHandler {
     assertEquals("fileViewSuccess", response2.response_type());
   }
 
+  /**
+   * tests viewing an unloaded file
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testViewUnloaded() throws IOException {
     HttpURLConnection clientConnection = tryRequest("viewcsv");
@@ -134,6 +164,11 @@ public class TestCSVHandler {
     assertEquals("noFileLoadedFailure", response.response_type());
   }
 
+  /**
+   * tests searching when no CSV is loaded
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testSearchCSVUnloaded() throws IOException {
 
@@ -147,6 +182,11 @@ public class TestCSVHandler {
     assertEquals("noFileLoadedFailure", response.response_type());
   }
 
+  /**
+   * tests searching with no value
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testNoValueProvided() throws IOException {
     this.loadFile("data/stars/stardata.csv");
@@ -161,6 +201,11 @@ public class TestCSVHandler {
     assertEquals("no search value provided", response.failureReason());
   }
 
+  /**
+   * tests searching value not in loaded file
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testValueNotFound() throws IOException {
     this.loadFile("data/census/RI_Census.csv");
@@ -176,6 +221,11 @@ public class TestCSVHandler {
     assertEquals("Oklahoma", response.responseMap().get("value_query"));
   }
 
+  /**
+   * tests searching with no index or header
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testSearchNoIdentifier() throws IOException {
     this.loadFile("data/census/RI_Census.csv");
@@ -193,6 +243,11 @@ public class TestCSVHandler {
         response.responseMap().get("data"));
   }
 
+  /**
+   * test searching with a header
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testSearchWithHeader() throws IOException {
     this.loadFile("data/census/RI_Census.csv");
@@ -211,6 +266,11 @@ public class TestCSVHandler {
         response.responseMap().get("data"));
   }
 
+  /**
+   * test searching with an index
+   *
+   * @throws IOException - thrown by tryRequest
+   */
   @Test
   public void testSearchWithIndex() throws IOException {
     this.loadFile("data/census/RI_Census.csv");

@@ -12,7 +12,15 @@ import Handlers.CSVHandlers.ViewCSV;
 import Handlers.Exceptions.DatasourceException;
 import spark.Spark;
 
+/** this class starts our server and delegates queries to respective handlers */
 public class Server {
+
+  /**
+   * run to start server
+   *
+   * @param args - any arguments given to main when server is run
+   * @throws DatasourceException - thrown by Datasource if connection to ACS API fails
+   */
   public static void main(String[] args) throws DatasourceException {
     int port = 3636;
     Spark.port(port);
@@ -32,7 +40,7 @@ public class Server {
     Spark.init();
     Spark.awaitInitialization();
 
-    // Notice this link alone leads to a 404... Why is that?
+    // Links localhost to navigate to
     System.out.println("Server started at http://localhost:" + port);
   }
 }
