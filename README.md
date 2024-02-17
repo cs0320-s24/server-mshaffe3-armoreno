@@ -35,7 +35,6 @@ The exceptions are primarily caught by the Handler classes themselves, as they a
 
 
 # Tests
-<<<<<<< HEAD
   **TestCache** - tests all possible cache options including: no cache, time-limit eviction policy, size eviction policy,
                 and normal cache
 
